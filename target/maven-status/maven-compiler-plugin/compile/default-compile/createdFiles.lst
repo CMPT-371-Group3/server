@@ -1,0 +1,7 @@
+org\server\ConnectionManagerInterface.class
+org\server\ClientInterface.class
+org\server\Server.class
+org\server\ServerInterface.class
+org\server\Status.class
+org\server\Client.class
+org\server\Main.class
