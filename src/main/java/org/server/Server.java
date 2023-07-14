@@ -9,6 +9,7 @@ public class Server implements ServerInterface{
     ArrayList<Client> Clients;
     int PortNumber;
     ServerSocket Server;
+
     public Server(int portNumber) {
         this.Clients = new ArrayList<>();
         this.PortNumber = portNumber;
@@ -25,7 +26,9 @@ public class Server implements ServerInterface{
 
     public Status DisconnectClient(String ipAddress) {
         try {
-            for (Client client : this.Clients) if (client.GetIpAddress().equals(ipAddress))  return client.Disconnect();
+            for (Client client : this.Clients)
+                if (client.GetIpAddress().equals(ipAddress))
+                    return client.Disconnect();
             return Status.INVALID_ARGUMENT;
         } catch (Exception e) {
             System.out.println("Error" + e.getMessage());
