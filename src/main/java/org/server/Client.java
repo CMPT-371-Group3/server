@@ -24,7 +24,7 @@ public class Client implements ClientInterface{
             System.out.println("Error: " + e.getMessage());
         }
     }
-    public String ListenForMessage() {
+    public String listenForMessage() {
         try {
             return this.Input.readLine();
         } catch (Exception e) {
@@ -33,11 +33,11 @@ public class Client implements ClientInterface{
         }
     }
 
-    public String GetIpAddress() {
+    public String getIpAddress() {
         return this.IpAddress;
     }
 
-    public int GetPortNumber() {
+    public int getPortNumber() {
         return this.PortNumber;
     }
 

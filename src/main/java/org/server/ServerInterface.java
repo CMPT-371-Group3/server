@@ -5,11 +5,11 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 public interface ServerInterface {
-    ArrayList<Client> GetClients();
-    ServerSocket GetServerSocket();
-    void AddClient(Client client);
-    Status DisconnectClient(String ipAddress);
-    String ListenForMessage();
-    Socket ListenServer();
+    ArrayList<Client> getClients();
+    ServerSocket getServerSocket();
+    void addClient(Client client);
+    Status disconnectClient(String ipAddress);
+    String listenForMessage();
+    Socket listenServer();
 
 }

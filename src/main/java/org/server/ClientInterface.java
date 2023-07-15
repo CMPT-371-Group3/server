@@ -3,8 +3,8 @@ package org.server;
 import java.net.Socket;
 
 public interface ClientInterface {
-    String GetIpAddress();
-    int GetPortNumber();
-    String ListenForMessage();
+    String getIpAddress();
+    int getPortNumber();
+    String listenForMessage();
     Socket GetSocket();
 }

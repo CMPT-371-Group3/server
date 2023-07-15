@@ -20,14 +20,14 @@ public class Server implements ServerInterface{
         }
     }
 
-    public void AddClient(Client client) {
+    public void addClient(Client client) {
         this.Clients.add(client);
     }
 
-    public Status DisconnectClient(String ipAddress) {
+    public Status disconnectClient(String ipAddress) {
         try {
             for (Client client : this.Clients)
-                if (client.GetIpAddress().equals(ipAddress))
+                if (client.getIpAddress().equals(ipAddress))
                     return client.Disconnect();
             return Status.INVALID_ARGUMENT;
         } catch (Exception e) {
@@ -36,15 +36,15 @@ public class Server implements ServerInterface{
         }
     }
 
-    public ArrayList<Client> GetClients() {
+    public ArrayList<Client> getClients() {
         return this.Clients;
     }
 
-    public ServerSocket GetServerSocket() {
+    public ServerSocket getServerSocket() {
         return null;
     }
 
-    public Socket ListenServer() {
+    public Socket listenServer() {
         try {
             return this.Server.accept();
         } catch (Exception e) {
@@ -53,9 +53,9 @@ public class Server implements ServerInterface{
         }
     }
 
-    public String ListenForMessage(){
+    public String listenForMessage(){
         try {
-            for(Client client: this.Clients) return client.ListenForMessage();
+            for(Client client: this.Clients) return client.listenForMessage();
             throw new SocketException("There was no messages to return");
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
