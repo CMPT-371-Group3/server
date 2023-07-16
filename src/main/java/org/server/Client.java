@@ -7,25 +7,25 @@ public class Client implements ClientInterface{
     private String IpAddress;
     private int PortNumber;
     private Socket Socket;
-    private InputStream InputStream;
-    private OutputStream OutputStream;
     private PrintWriter Output;
     private BufferedReader Input;
     public Client(String ipAddress, int portNumber, Socket socket) {
         try {
+            // Store any information needed then create the Socket, and the I/O
             this.IpAddress = ipAddress;
             this.PortNumber = portNumber;
             this.Socket = socket;
-            this.InputStream = socket.getInputStream();
-            this.OutputStream = socket.getOutputStream();
-            this.Output = new PrintWriter(this.OutputStream, true);
-            this.Input = new BufferedReader(new InputStreamReader(this.InputStream));
+            InputStream inputStream = socket.getInputStream();
+            OutputStream outputStream = socket.getOutputStream();
+            this.Output = new PrintWriter(outputStream, true);
+            this.Input = new BufferedReader(new InputStreamReader(inputStream));
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
     public String listenForMessage() {
         try {
+            // Listen for inputs and then pass them up
             return this.Input.readLine();
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
@@ -41,12 +41,13 @@ public class Client implements ClientInterface{
         return this.PortNumber;
     }
 
-    public java.net.Socket GetSocket() {
+    public java.net.Socket getSocket() {
         return this.Socket;
     }
 
-    public Status Disconnect() {
+    public Status disconnect() {
         try {
+            // Close the connection
             this.Input.close();
             this.Output.close();
             this.Socket.close();
@@ -54,6 +55,15 @@ public class Client implements ClientInterface{
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
             return Status.FAILURE;
+        }
+    }
+
+    public void sendMessage(String payload) {
+        try {
+            // Write to the client
+            this.Output.println(payload);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 }

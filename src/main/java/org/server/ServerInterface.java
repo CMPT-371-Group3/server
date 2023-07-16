@@ -11,5 +11,5 @@ public interface ServerInterface {
     Status disconnectClient(String ipAddress);
     String listenForMessage();
     Socket listenServer();
-
+    void handleThread();
 }

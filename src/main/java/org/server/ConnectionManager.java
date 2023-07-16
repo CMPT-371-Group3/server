@@ -1,13 +1,12 @@
 package org.server;
 
-import java.net.*;
-
-public class ConnectionManager {
+public class ConnectionManager implements ConnectionManagerInterface{
     private Server Server;
     private int RunningPortNumber;
 
     public ConnectionManager(int portNumber) {
         try {
+            // Save the port number and then create a Server
             this.RunningPortNumber = portNumber;
             this.Server = new Server(portNumber);
         } catch (Exception e) {
@@ -15,13 +14,10 @@ public class ConnectionManager {
         }
     }
 
-    public void Listen() {
-        while(true) {
-            Socket socket = this.Server.listenServer();
-            String ipAddress = socket.getInetAddress().getHostAddress();
-            int portNumber = socket.getPort();
-            Client client = new Client(ipAddress, portNumber, socket);
-            this.Server.addClient(client);
-        }
+    public void listen() {
+        // We create a new runnable and then put it on it's own thread
+        ServerRunnable serverRunnable = new ServerRunnable(this.Server);
+        Thread t = new Thread(serverRunnable);
+        t.start();
     }
 }

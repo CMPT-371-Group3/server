@@ -2,6 +2,11 @@ package org.server;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello world!");
+        // Set Server Port Number
+        int portNumber = 5000;
+
+        // Create a ConnectionManager and Listen for Connections
+        ConnectionManager connectionManager = new ConnectionManager(portNumber);
+        connectionManager.listen();
     }
 }
