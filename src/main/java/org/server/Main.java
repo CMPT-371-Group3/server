@@ -4,9 +4,8 @@ public class Main {
     public static void main(String[] args) {
         // Set Server Port Number
         int portNumber = 5000;
-
-        // Create a ConnectionManager and Listen for Connections
-        ConnectionManager connectionManager = new ConnectionManager(portNumber);
-        connectionManager.listen();
+        // Create a Server and Listen for Connections
+        Server server = new Server(portNumber);
+        server.listenServer();
     }
 }

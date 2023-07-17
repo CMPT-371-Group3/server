@@ -3,7 +3,7 @@ package org.server;
 import java.io.*;
 import java.net.Socket;
 
-public class Client implements ClientInterface{
+public class Client {
     private String IpAddress;
     private int PortNumber;
     private Socket Socket;
@@ -39,10 +39,6 @@ public class Client implements ClientInterface{
 
     public int getPortNumber() {
         return this.PortNumber;
-    }
-
-    public java.net.Socket getSocket() {
-        return this.Socket;
     }
 
     public Status disconnect() {

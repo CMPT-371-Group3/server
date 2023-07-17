@@ -2,18 +2,19 @@ package org.server;
 
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
-public class Server implements ServerInterface{
-    ArrayList<Client> Clients;
-    int PortNumber;
-    ServerSocket Server;
+public class Server {
+    private ArrayList<Client> Clients;
+    private ServerSocket Server;
+    private final long MILLISECONDS_IN_A_MINUTE = 60000;
 
     public Server(int portNumber) {
         // Create an ArrayList for Clients and save the Port Number then create a ServerSocket
         try {
-            this.PortNumber = portNumber;
             this.Clients = new ArrayList<>();
             this.Server = new ServerSocket(portNumber);
         } catch (Exception e) {
@@ -33,10 +34,10 @@ public class Server implements ServerInterface{
     }
 
     // Disconnect a specific client
-    public Status disconnectClient(String ipAddress) {
+    public Status disconnectClient(String ipAddress, int portNumber){
         try {
             for (Client client : this.Clients)
-                if (client.getIpAddress().equals(ipAddress))
+                if (client.getIpAddress().equals(ipAddress) && client.getPortNumber() == portNumber)
                     return client.disconnect();
             return Status.INVALID_ARGUMENT;
         } catch (Exception e) {
@@ -45,38 +46,65 @@ public class Server implements ServerInterface{
         }
     }
 
-    public ArrayList<Client> getClients() {
-        // Return clients
-        return this.Clients;
-    }
-
-    public ServerSocket getServerSocket() {
-        // Return serverSocket
-        return null;
-    }
-
-    public Socket listenServer() {
+    public void listenServer() {
         try {
-            // Accept Connections
-            return this.Server.accept();
+            long startTime = System.currentTimeMillis();
+            while(true) {
+                // If we pass 1 minute, then timeout the thread and let the Server handle it
+                if((System.currentTimeMillis() - startTime) >= this.MILLISECONDS_IN_A_MINUTE) {
+                    this.timeoutConnections();
+                    break;
+                } else {
+                    // Listen for connections and if there is, then send it to then accept the connection
+                    Socket socket = this.Server.accept();
+                    Client client = new Client(socket.getInetAddress().getHostAddress(), socket.getPort(), socket);
+                    this.addClient(client);
+                }
+            }
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
-            return null;
         }
     }
 
     public String listenForMessage(){
         try {
             // Listen for messages and then return it if there was any other let the calling function know
-            for(Client client: this.Clients) return client.listenForMessage();
-            throw new SocketException("There was no messages to return");
+            ExecutorService executorService = Executors.newFixedThreadPool(4);
+            ArrayList<FutureTask<String>> taskArrayList = new ArrayList<>();
+            for(Client client: this.Clients) {
+                ClientHandler clientHandler = new ClientHandler(client);
+                FutureTask<String> futureTask = new FutureTask<>(clientHandler);
+                executorService.submit(futureTask);
+                taskArrayList.add(futureTask);
+            }
+
+            while (true)
+                try {
+                    for (FutureTask<String> stringFutureTask : taskArrayList) {
+                        if (stringFutureTask.isDone()) {
+                            handleMessage(stringFutureTask.get());
+                            taskArrayList.remove(stringFutureTask);
+                            // Figure out how to listen for another message from Client
+                        }
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error: " + e.getMessage());
+                }
+
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
             return null;
         }
     }
 
-    public void handleThread() {
+    private void handleMessage(String message) {
+        // Do code
+        MessageHandler messageHandler = new MessageHandler(message);
+        Thread t = new Thread(messageHandler);
+        t.start();
+    }
+
+    public void timeoutConnections() {
         // The thread has been timed out, if there is not enough players, let them know,
         // otherwise start the game, and if there is more than 4, then kick out the other players
         if(this.Clients.size() == 1) {
@@ -89,6 +117,7 @@ public class Server implements ServerInterface{
             }
         } else if (this.Clients.size() < 5) {
             this.Clients.forEach(client -> client.sendMessage(Tokens.START.name() + "; Beginning Game;"));
+            this.listenForMessage();
         } else {
             for(int i = 0; i < 4; i++) {
                 this.Clients.get(0).sendMessage(Tokens.START.name() + "; Beginning Game");
@@ -102,6 +131,7 @@ public class Server implements ServerInterface{
                     default -> System.out.println("Unknown Status");
                 }
             }
+            this.listenForMessage();
         }
     }
 }
