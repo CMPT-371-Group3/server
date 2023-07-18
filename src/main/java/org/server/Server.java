@@ -3,12 +3,19 @@ package org.server;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.io.PrintWriter;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Server {
     private ArrayList<Client> Clients;
     private ServerSocket Server;
     private final long MILLISECONDS_IN_A_MINUTE = 60000;
     private GameBoard GameBoard;
+    private HashMap<String, String> map;
 
     public Server(int portNumber) {
         // Create an ArrayList for Clients and save the Port Number then create a ServerSocket
@@ -16,6 +23,7 @@ public class Server {
             this.Clients = new ArrayList<>();
             this.Server = new ServerSocket(portNumber);
             this.GameBoard = new GameBoard(8, 8);
+            map = new HashMap<String, String>();
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
@@ -55,9 +63,12 @@ public class Server {
                     break;
                 } else {
                     // Listen for connections and if there is, then send it to then accept the connection
+                    System.out.println("server " + this.Server.toString());
                     Socket socket = this.Server.accept();
-                    Client client = new Client(socket.getInetAddress().getHostAddress(), socket.getPort(), socket, this);
-                    this.addClient(client);
+                    // Client client = new Client(socket.getInetAddress().getHostAddress(), socket.getPort(), socket, this);
+                    // this.addClient(client);
+                    ClientHandler newClient = new ClientHandler(socket);
+                    new Thread(newClient).start();
                 }
             }
         } catch (Exception e) {
@@ -138,7 +149,7 @@ public class Server {
         try {
             // start all client threads
             for (Client client : this.Clients) {
-                client.start();
+                // client.start();
             }
         }
         catch (Exception e) {
@@ -150,6 +161,62 @@ public class Server {
         // handle based on client token
         // if client token is draw x y, then apply those changes to the GameBoard
         // after handling, broadcast changes to all clients
+    }
+
+    public class ClientHandler implements Runnable {
+        private final Socket clientSocket; 
+        private PrintWriter out;
+        private BufferedReader in;
+
+        public ClientHandler(Socket socket) {
+            this.clientSocket = socket;
+            try {
+                this.out = new PrintWriter(clientSocket.getOutputStream(), true);
+                this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            } catch (IOException e) {
+                e.printStackTrace();
+                this.out = null;
+                this.in = null;
+            }
+        }
+
+        public void run() {
+            try {
+                String line = in.readLine();
+                while (line != null && !line.equalsIgnoreCase("exit")) {
+                    System.out.println(clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort() + ": " + line);
+                    // if (sc != null) {
+                        // String serverRes = sc.nextLine();
+                        // System.out.println("Server: " + serverRes);
+                        // out.println(serverRes);
+                    // } else {
+                        map.put(clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort(), line);
+                        out.println("test");
+                    // }
+                    line = in.readLine();
+                }
+            } catch(IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    if (out != null) {
+                        out.close();
+                    }
+                    if (in != null) {
+                        in.close();
+                        clientSocket.close();
+                    }
+                } catch(IOException e) {
+                    e.printStackTrace();
+                }                
+                for (Map.Entry<String, String> entry : map.entrySet()) {
+                    String key = entry.getKey();
+                    String value = entry.getValue();
+                    System.out.println("Key: " + key + ", Value: " + value);
+                }                
+                System.out.println(clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort() + " has disconnected");
+            }
+        }
     }
 
 }

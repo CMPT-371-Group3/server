@@ -2,26 +2,50 @@ package org.server;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Scanner;
 
-public class Client extends Thread {
-    private String IpAddress;
-    private int PortNumber;
-    private Socket Socket;
-    private PrintWriter Output;
-    private BufferedReader Input;
-    private Server Server;
+public class Client {
+    private String ipAddress;
+    private int portNumber;
+    private Socket socket;
+    private PrintWriter output;
+    private BufferedReader input;
 
-    public Client(String ipAddress, int portNumber, Socket socket, Server server) {
+    public static void main(String args[]) {
+        Client client = new Client("localhost", 6000);
+        String line = null;
+        Scanner sc = new Scanner(System.in);
+        System.out.print(client.getIpAddress() + ":" + client.getPortNumber() + ": ");
+        line =  sc.nextLine();
+        while (!line.equalsIgnoreCase("exit")) {
+            client.getOutput().println(line);
+            client.getOutput().flush();
+            String response = null;
+            try {
+                response = client.getInput().readLine();            
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+            if (response != null) {
+                System.out.println("Server: " + response);
+            }
+            line = "";
+            System.out.print(client.getIpAddress() + ":" + client.getPortNumber() + ": " + line);
+            line = sc.nextLine();
+        }
+        client.disconnect();
+    }
+
+    public Client(String ipAddress, int portNumber) {
         try {
             // Store any information needed then create the Socket, and the I/O
-            this.IpAddress = ipAddress;
-            this.PortNumber = portNumber;
-            this.Socket = socket;
-            this.Server = server;
+            this.ipAddress = ipAddress;
+            this.portNumber = portNumber;
+            this.socket = new Socket(ipAddress, portNumber);
             InputStream inputStream = socket.getInputStream();
             OutputStream outputStream = socket.getOutputStream();
-            this.Output = new PrintWriter(outputStream, true);
-            this.Input = new BufferedReader(new InputStreamReader(inputStream));
+            this.output = new PrintWriter(outputStream, true);
+            this.input = new BufferedReader(new InputStreamReader(inputStream));
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
@@ -29,7 +53,7 @@ public class Client extends Thread {
     public String listenForMessage() {
         try {
             // Listen for inputs and then pass them up
-            return this.Input.readLine();
+            return this.input.readLine();
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
             return  null;
@@ -37,19 +61,19 @@ public class Client extends Thread {
     }
 
     public String getIpAddress() {
-        return this.IpAddress;
+        return this.ipAddress;
     }
 
     public int getPortNumber() {
-        return this.PortNumber;
+        return this.portNumber;
     }
 
     public Status disconnect() {
         try {
             // Close the connection
-            this.Input.close();
-            this.Output.close();
-            this.Socket.close();
+            this.input.close();
+            this.output.close();
+            this.socket.close();
             return Status.SUCCESS;
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
@@ -60,22 +84,30 @@ public class Client extends Thread {
     public void sendMessage(String payload) {
         try {
             // Write to the client
-            this.Output.println(payload);
+            this.output.println(payload);
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
 
-    @Override
-    public void run() {
-        try {
-            // listen for messages and pass them to the server
-            while (true) {
-                String message = this.Input.readLine();
-                this.Server.handleClientMessage(message, this);
-            }
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
+    public PrintWriter getOutput() {
+        return this.output;
     }
+
+    public BufferedReader getInput() {
+        return this.input;
+    }
+
+    // @Override
+    // public void run() {
+    //     try {
+    //         // listen for messages and pass them to the server
+    //         while (true) {
+    //             String message = this.Input.readLine();
+    //             this.Server.handleClientMessage(message, this);
+    //         }
+    //     } catch (Exception e) {
+    //         System.out.println("Error: " + e.getMessage());
+    //     }
+    // }
 }
