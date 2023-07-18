@@ -11,12 +11,14 @@ public class Server {
     private ArrayList<Client> Clients;
     private ServerSocket Server;
     private final long MILLISECONDS_IN_A_MINUTE = 60000;
+    private GameBoard gameBoard;
 
     public Server(int portNumber) {
         // Create an ArrayList for Clients and save the Port Number then create a ServerSocket
         try {
             this.Clients = new ArrayList<>();
             this.Server = new ServerSocket(portNumber);
+            this.gameBoard = new GameBoard();
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
@@ -57,7 +59,7 @@ public class Server {
                 } else {
                     // Listen for connections and if there is, then send it to then accept the connection
                     Socket socket = this.Server.accept();
-                    Client client = new Client(socket.getInetAddress().getHostAddress(), socket.getPort(), socket);
+                    Client client = new Client(socket.getInetAddress().getHostAddress(), socket.getPort(), socket, this);
                     this.addClient(client);
                 }
             }
@@ -134,4 +136,24 @@ public class Server {
             this.listenForMessage();
         }
     }
+
+    public void startGame() {
+        try {
+            // start all client threads
+            for (Client client : this.Clients) {
+                client.start();
+            }
+        }
+        catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+            return;
+        }
+    }
+
+    public void handleClientMessage(String message, Client client) {
+        // handle based on client token
+        // if client token is draw x y, then apply those changes to the GameBoard
+        // after handling, broadcast changes to all clients
+    }
+
 }

@@ -1,30 +1,30 @@
 package org.server;
 
 public class BoardCell {
-    private Player lockedBy = Player.NONE;
+    private Client lockedBy = null;
 
-    // if player has completed colouring
+    // if client has completed colouring
     private boolean isComplete = false;
 
-    public Player getLockedBy() {
+    public Client getLockedBy() {
         return lockedBy;
     }
 
-    public boolean setLockedBy(Player player) {
+    public boolean setLockedBy(Client client) {
         // lock if not already locked
-        if (lockedBy != Player.NONE) {
+        if (lockedBy != null) {
             return false;
         }
 
-        lockedBy = player;
+        lockedBy = client;
         return true;
     }
 
-    public boolean getIsComplete() {
+    public boolean getIsColoured() {
         return isComplete;
     }
 
-    public void setComplete() {
+    public void setColoured() {
         isComplete = true;
     }
 }
