@@ -59,7 +59,7 @@ public class Server {
                 } else {
                     // Listen for connections and if there is, then send it to then accept the connection
                     Socket socket = this.Server.accept();
-                    Client client = new Client(socket.getInetAddress().getHostAddress(), socket.getPort(), socket);
+                    Client client = new Client(socket.getInetAddress().getHostAddress(), socket.getPort(), socket, this);
                     this.addClient(client);
                 }
             }
