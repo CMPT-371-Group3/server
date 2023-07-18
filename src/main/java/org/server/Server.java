@@ -3,22 +3,19 @@ package org.server;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
 
 public class Server {
     private ArrayList<Client> Clients;
     private ServerSocket Server;
     private final long MILLISECONDS_IN_A_MINUTE = 60000;
-    private GameBoard gameBoard;
+    private GameBoard GameBoard;
 
     public Server(int portNumber) {
         // Create an ArrayList for Clients and save the Port Number then create a ServerSocket
         try {
             this.Clients = new ArrayList<>();
             this.Server = new ServerSocket(portNumber);
-            this.gameBoard = new GameBoard();
+            this.GameBoard = new GameBoard(8, 8);
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
@@ -68,43 +65,43 @@ public class Server {
         }
     }
 
-    public String listenForMessage(){
-        try {
-            // Listen for messages and then return it if there was any other let the calling function know
-            ExecutorService executorService = Executors.newFixedThreadPool(4);
-            ArrayList<FutureTask<String>> taskArrayList = new ArrayList<>();
-            for(Client client: this.Clients) {
-                ClientHandler clientHandler = new ClientHandler(client);
-                FutureTask<String> futureTask = new FutureTask<>(clientHandler);
-                executorService.submit(futureTask);
-                taskArrayList.add(futureTask);
-            }
-
-            while (true)
-                try {
-                    for (FutureTask<String> stringFutureTask : taskArrayList) {
-                        if (stringFutureTask.isDone()) {
-                            handleMessage(stringFutureTask.get());
-                            taskArrayList.remove(stringFutureTask);
-                            // Figure out how to listen for another message from Client
-                        }
-                    }
-                } catch (Exception e) {
-                    System.out.println("Error: " + e.getMessage());
-                }
-
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-            return null;
-        }
-    }
-
-    private void handleMessage(String message) {
-        // Do code
-        MessageHandler messageHandler = new MessageHandler(message);
-        Thread t = new Thread(messageHandler);
-        t.start();
-    }
+//    public String listenForMessage(){
+//        try {
+//            // Listen for messages and then return it if there was any other let the calling function know
+//            ExecutorService executorService = Executors.newFixedThreadPool(4);
+//            ArrayList<FutureTask<String>> taskArrayList = new ArrayList<>();
+//            for(Client client: this.Clients) {
+//                ClientHandler clientHandler = new ClientHandler(client);
+//                FutureTask<String> futureTask = new FutureTask<>(clientHandler);
+//                executorService.submit(futureTask);
+//                taskArrayList.add(futureTask);
+//            }
+//
+//            while (true)
+//                try {
+//                    for (FutureTask<String> stringFutureTask : taskArrayList) {
+//                        if (stringFutureTask.isDone()) {
+//                            handleMessage(stringFutureTask.get());
+//                            taskArrayList.remove(stringFutureTask);
+//                            // Figure out how to listen for another message from Client
+//                        }
+//                    }
+//                } catch (Exception e) {
+//                    System.out.println("Error: " + e.getMessage());
+//                }
+//
+//        } catch (Exception e) {
+//            System.out.println("Error: " + e.getMessage());
+//            return null;
+//        }
+//    }
+//
+//    private void handleMessage(String message) {
+//        // Do code
+//        MessageHandler messageHandler = new MessageHandler(message);
+//        Thread t = new Thread(messageHandler);
+//        t.start();
+//    }
 
     public void timeoutConnections() {
         // The thread has been timed out, if there is not enough players, let them know,
@@ -119,7 +116,7 @@ public class Server {
             }
         } else if (this.Clients.size() < 5) {
             this.Clients.forEach(client -> client.sendMessage(Tokens.START.name() + "; Beginning Game;"));
-            this.listenForMessage();
+            this.startGame();
         } else {
             for(int i = 0; i < 4; i++) {
                 this.Clients.get(0).sendMessage(Tokens.START.name() + "; Beginning Game");
@@ -133,7 +130,7 @@ public class Server {
                     default -> System.out.println("Unknown Status");
                 }
             }
-            this.listenForMessage();
+            this.startGame();
         }
     }
 
@@ -146,7 +143,6 @@ public class Server {
         }
         catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
-            return;
         }
     }
 
