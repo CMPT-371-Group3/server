@@ -1,7 +1,9 @@
 package org.server;
 
-public class Main {
-    public static void main(String[] args) {
+
+public class App {
+    public static void main( String[] args ) {
+        System.out.println( "Server Started" );
         // Set Server Port Number
         int portNumber = 6000;
         // Create a Server and Listen for Connections
