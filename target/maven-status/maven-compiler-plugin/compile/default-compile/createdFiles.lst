@@ -2,7 +2,6 @@ org/server/Tokens.class
 org/server/Client$ClientThread.class
 org/server/Server$ClientHandler.class
 org/server/App.class
-org/server/Main.class
 org/server/MessageHandler.class
 org/server/BoardCell.class
 org/server/Client.class
