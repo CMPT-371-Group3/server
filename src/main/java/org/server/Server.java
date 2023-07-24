@@ -172,13 +172,19 @@ public class Server {
     }
     
     public void broadcastMessages(ClientHandler sender, String message) {
+        // for (ClientHandler curr : clients) {
+        //     if (curr.getClientSocket() != sender.getClientSocket()) {
+        //         // System.out.println("Broadcasting " + message);
+        //         curr.sendMessage(curr.getClientSocket().getInetAddress().getHostAddress() + ":" + curr.getClientSocket().getPort() + ": " + message);
+        //     } else {
+        //         curr.sendMessage("");
+        //     }
+        // }
+
+        // send to all clients
         for (ClientHandler curr : clients) {
-            if (curr.getClientSocket() != sender.getClientSocket()) {
-                // System.out.println("Broadcasting " + message);
-                curr.sendMessage(curr.getClientSocket().getInetAddress().getHostAddress() + ":" + curr.getClientSocket().getPort() + ": " + message);
-            } else {
-                curr.sendMessage("");
-            }
+            System.out.println("Broadcasting \n" + message);
+            curr.sendMessage(message);
         }
     }
     public class ClientHandler implements Runnable {
@@ -186,6 +192,7 @@ public class Server {
         private PrintWriter out;
         private BufferedReader in;
         private Scanner sc;
+        private Client client;
         
         public ClientHandler(Socket socket) {
             this.clientSocket = socket;
@@ -219,18 +226,36 @@ public class Server {
                 String line = this.in.readLine();
                 System.out.print(clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort() + " selected option: " + line);                
                 while (line != null && !line.equalsIgnoreCase("exit")) {
-                    switch (line) {
+                    System.out.println("Incoming: " + line);
+                    // parse line
+                    String[] tokens = line.split("/");
+                    switch (tokens[0]) {
                         case "JOIN":
                             broadcastMessages(this, "\n" + this.clientSocket.getInetAddress().getHostAddress() + ":" + this.clientSocket.getPort() + " has connected");
                             break;
-                        case "MESSAGE":
-                            System.out.println("Incoming: " + line);
-                            this.out.println("MESSAGE");
-                            this.out.println("Message: ");
-                            line = this.in.readLine();
-                            // System.out.println("Message: " + ("\n" + this.clientSocket.getInetAddress().getHostAddress() + ":" + this.clientSocket.getPort() + ": " + line));
-                            broadcastMessages(this, line);
+                        case "LOCK": {
+                            System.out.println("processing LOCK");
+                            // tokens[1] in format x,y
+                            Integer[] coords = {Integer.parseInt(tokens[1].split(",")[0]), Integer.parseInt(tokens[1].split(",")[1])};
+                            System.out.println("coords: " + coords[0] + " " + coords[1]);
+                            boolean returnval = gameBoard.lockCell(coords[0], coords[1]); 
+                            System.out.println("has been locked? " + returnval);
+                            //line = this.in.readLine();
+                            broadcastMessages(this, gameBoard.toString());
                             break;
+                        }
+                        case "UNLOCK": {
+                            Integer[] coords = {Integer.parseInt(tokens[1].split(",")[0]), Integer.parseInt(tokens[1].split(",")[1])};
+                            gameBoard.unlockCell(coords[0], coords[1]);
+                            broadcastMessages(this, gameBoard.toString());
+                            break;
+                        }
+                        case "FILL": {
+                            Integer[] coords = {Integer.parseInt(tokens[1].split(",")[0]), Integer.parseInt(tokens[1].split(",")[1])};
+                            gameBoard.fillCell(coords[0], coords[1]);
+                            broadcastMessages(this, gameBoard.toString());
+                            break;
+                        }
                         case "EXIT":
                             System.out.println("EXIT");
                             this.out.println("EXIT");

@@ -27,7 +27,8 @@ public class Client {
                 try {
                     String serverMessage;
                     while((serverMessage = client.getInput().readLine()) != null) {
-                        switch (serverMessage) {
+                        String[] tokens = serverMessage.split("/");
+                        switch (tokens[0]) {
                             case "EXIT":
                                 return;
                             case "MESSAGE":
@@ -45,9 +46,8 @@ public class Client {
                                     lock.notifyAll();
                                 }
                                 break;
-                            case "BROADCAST":
-                                // System.out.println(client.getAddressWithPort() + ": " + serverMessage);
-                                // break;
+                            case "LOCK":
+                                
                             default:
                                 if (serverMessage.length() > 0)
                                 System.out.println(client.getAddressWithPort() + ": " + serverMessage);
@@ -60,13 +60,16 @@ public class Client {
             
             client.getOutput().println("JOIN");
             System.out.println(client.getAddressWithPort() + ": ");
-            System.out.println("Select an option:\nEXIT\nMESSAGE");
+            System.out.println("Select an option:\nEXIT\nLOCK/row,col\nUNLOCK/row,col\nFILL/row,col");
             System.out.print("Selection: ");
             line = sc.nextLine();
             while (!line.equalsIgnoreCase("EXIT")) {
-                switch (line) {
-                    case "MESSAGE":
-                        client.getOutput().println("MESSAGE");
+                String[] tokens = line.split("/");
+                switch (tokens[0]) {
+                    case "LOCK":
+                    case "UNLOCK":
+                    case "FILL":
+                        client.getOutput().println(line);
                         client.getOutput().flush();
                         break;
                     default:
@@ -79,7 +82,7 @@ public class Client {
                     }
                 }
                 client.setMsgSent(false);
-                System.out.println("\nSelect an option:\nEXIT\nMESSAGE");
+                System.out.println("\nSelect an option:\nEXIT\nLOCK/row,col\nUNLOCK/row,col\nFILL/row,col");
                 System.out.print("Selection: ");                
                 line = sc.nextLine();              
             }
