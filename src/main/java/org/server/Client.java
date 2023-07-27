@@ -60,37 +60,41 @@ public class Client {
             
             client.getOutput().println("JOIN");
             System.out.println(client.getAddressWithPort() + ": ");
-            System.out.println("Select an option:\nEXIT\nLOCK/row,col\nUNLOCK/row,col\nFILL/row,col");
-            System.out.print("Selection: ");
-            line = sc.nextLine();
-            while (!line.equalsIgnoreCase("EXIT")) {
+            
+            while (true) {
+                System.out.println("Select an option:\nEXIT\nLOCK/row,col\nUNLOCK/row,col\nFILL/row,col");
+                System.out.print("Selection: ");
+                line = sc.nextLine();
+                System.out.println("line: " + line);
+                if (line.equalsIgnoreCase("EXIT")) { break; }
                 String[] tokens = line.split("/");
                 switch (tokens[0]) {
                     case "LOCK":
                     case "UNLOCK":
                     case "FILL":
+                    case "READY":
+                        System.out.println("Sending: " + line);
                         client.getOutput().println(line);
                         client.getOutput().flush();
                         break;
                     default:
+                        System.out.println("Invalid selection");
                 }
-                synchronized (lock) {
-                    try {
-                        lock.wait(); // Wait for notification from the other thread
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-                client.setMsgSent(false);
-                System.out.println("\nSelect an option:\nEXIT\nLOCK/row,col\nUNLOCK/row,col\nFILL/row,col");
-                System.out.print("Selection: ");                
-                line = sc.nextLine();              
+                // synchronized (lock) {
+                //     try {
+                //         lock.wait(); // Wait for notification from the other thread
+                //     } catch (InterruptedException e) {
+                //         e.printStackTrace();
+                //     }
+                // }
+                //client.setMsgSent(false);           
             }
-            if (line.equalsIgnoreCase("exit")) {
-                client.getOutput().println("EXIT");
-                client.getOutput().flush();                    
-            } 
-            client.disconnect();
+            System.out.println("Stopped listening");
+            // if (line.equalsIgnoreCase("exit")) {
+            //     client.getOutput().println("EXIT");
+            //     client.getOutput().flush();                    
+            // } 
+            //client.disconnect();
             /*
             */
         } catch(IOException e) {
