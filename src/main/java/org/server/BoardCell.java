@@ -1,11 +1,17 @@
 package org.server;
 
+import java.util.concurrent.Semaphore;
+
 public class BoardCell {
-    private Client lockedBy = null;
+    //private Client lockedBy = null;
+    private boolean locked = false;
+
+    private Semaphore sema = new Semaphore(1);
 
     // if client has completed colouring
-    private boolean isComplete = false;
+    private boolean isFilled = false;
 
+    /*
     public Client getLockedBy() {
         return lockedBy;
     }
@@ -16,15 +22,42 @@ public class BoardCell {
             return false;
         }
 
+        if (!sema.tryAcquire()) {
+            return false;
+        }
+
         lockedBy = client;
         return true;
     }
+    */
 
-    public boolean getIsColoured() {
-        return isComplete;
+    public boolean setLocked() {
+        if (locked) {
+            return false;
+        }
+
+        if (!sema.tryAcquire()) {
+            return false;
+        }
+
+        locked = true;
+        return true;
     }
 
-    public void setColoured() {
-        isComplete = true;
+    public boolean getLocked() {
+        return locked;
+    }
+
+    public void unlock() {
+        locked = false;
+        sema.release();
+    }
+
+    public boolean getIsFilled() {
+        return isFilled;
+    }
+
+    public void setIsFilled() {
+        isFilled = true;
     }
 }

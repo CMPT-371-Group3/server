@@ -3,13 +3,7 @@ package org.server;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.io.PrintWriter;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Scanner;
 import java.util.HashMap;
-import java.util.Map;
 
 public class Server {
     private ArrayList<ClientHandler> clients;
@@ -17,6 +11,7 @@ public class Server {
     private final long MILLISECONDS_IN_A_MINUTE = 60000;
     private GameBoard gameBoard;
     private HashMap<String, String> map;
+    private boolean gameStarted = false;
 
     public Server(int portNumber) {
         // Create an ArrayList for Clients and save the Port Number then create a ServerSocket
@@ -56,6 +51,11 @@ public class Server {
     }
     */
 
+    public void startServer() {
+        listenForConnections();
+        checkReady();
+    }
+
 
     public void listenServer() {
         try {
@@ -71,7 +71,7 @@ public class Server {
                     Socket socket = this.server.accept();
                     // Client client = new Client(socket.getInetAddress().getHostAddress(), socket.getPort(), socket, this);
                     // this.addClient(client);
-                    ClientHandler newClient = new ClientHandler(socket);
+                    ClientHandler newClient = new ClientHandler(socket, this);
                     this.clients.add(newClient);
                     new Thread(newClient).start();
                 }
@@ -80,6 +80,40 @@ public class Server {
             System.out.println("Error: " + e.getMessage());
         }
     }
+
+    private void listenForConnections() {
+        new Thread(() -> {
+            try {
+                while(!gameStarted) {
+                    Socket socket = this.server.accept();
+                    ClientHandler newClient = new ClientHandler(socket, this);
+                    this.clients.add(newClient);
+                    new Thread(newClient).start();
+                }
+            } catch (Exception e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        }).start();
+    }
+
+    private void checkReady() { 
+        while(!gameStarted) {
+            if (this.clients.size() >= 2) {
+                boolean allReady = true;
+                for (ClientHandler client : clients) {
+                    if (!client.getIsReady()) {
+                        allReady = false;
+                        break;
+                    }
+                }
+                if (allReady) {
+                    // start game
+                    this.gameStarted = true;
+                }
+            }
+        }
+    }
+    
 
     /*
     public String listenForMessage(){
@@ -165,101 +199,44 @@ public class Server {
 
 
     
-    public void handleClientMessage(String message, Client client) {
+    public void handleClientMessage(String message, ClientHandler client) {
         // handle based on client token
         // if client token is draw x y, then apply those changes to the GameBoard
         // after handling, broadcast changes to all clients
     }
     
     public void broadcastMessages(ClientHandler sender, String message) {
+        // for (ClientHandler curr : clients) {
+        //     if (curr.getClientSocket() != sender.getClientSocket()) {
+        //         // System.out.println("Broadcasting " + message);
+        //         curr.sendMessage(curr.getClientSocket().getInetAddress().getHostAddress() + ":" + curr.getClientSocket().getPort() + ": " + message);
+        //     } else {
+        //         curr.sendMessage("");
+        //     }
+        // }
+
+        // send to all clients
         for (ClientHandler curr : clients) {
-            if (curr.getClientSocket() != sender.getClientSocket()) {
-                // System.out.println("Broadcasting " + message);
-                curr.sendMessage(curr.getClientSocket().getInetAddress().getHostAddress() + ":" + curr.getClientSocket().getPort() + ": " + message);
-            } else {
-                curr.sendMessage("");
-            }
-        }
-    }
-    public class ClientHandler implements Runnable {
-        private final Socket clientSocket; 
-        private PrintWriter out;
-        private BufferedReader in;
-        private Scanner sc;
-        
-        public ClientHandler(Socket socket) {
-            this.clientSocket = socket;
-            try {
-                this.out = new PrintWriter(clientSocket.getOutputStream(), true);
-                this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                this.sc = new Scanner(System.in);
-            } catch (IOException e) {
-                e.printStackTrace();
-                this.out = null;
-                this.in = null;
-                this.sc = null;
-            }
-        }
-        
-        public Socket getClientSocket() {
-            return this.clientSocket;
-        }
-        
-
-        public void sendMessage(String message) {
-            System.out.println(this.getClientSocket().getPort() + " " + message);
-            // this.out.println("BROADCAST");
-            this.out.println(message);
-        }
-
-        public void run() {
-            try {
-                System.out.println(clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort() + " has connected");
-                this.out.println(clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort());
-                String line = this.in.readLine();
-                System.out.print(clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort() + " selected option: " + line);                
-                while (line != null && !line.equalsIgnoreCase("exit")) {
-                    switch (line) {
-                        case "JOIN":
-                            broadcastMessages(this, "\n" + this.clientSocket.getInetAddress().getHostAddress() + ":" + this.clientSocket.getPort() + " has connected");
-                            break;
-                        case "MESSAGE":
-                            System.out.println("Incoming: " + line);
-                            this.out.println("MESSAGE");
-                            this.out.println("Message: ");
-                            line = this.in.readLine();
-                            // System.out.println("Message: " + ("\n" + this.clientSocket.getInetAddress().getHostAddress() + ":" + this.clientSocket.getPort() + ": " + line));
-                            broadcastMessages(this, line);
-                            break;
-                        case "EXIT":
-                            System.out.println("EXIT");
-                            this.out.println("EXIT");
-                            break;
-                        default:
-                    }
-                    System.out.print(clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort() + " selected option: ");
-                    line = in.readLine();
-                    System.out.println(line);
-                    System.out.println();
-                }
-            } catch(IOException e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    if (out != null) {
-                        out.close();
-                    }
-                    if (in != null) {
-                        in.close();
-                        clientSocket.close();
-                    }
-                } catch(IOException e) {
-                    e.printStackTrace();
-                }                
-                broadcastMessages(this, clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort() + " has disconnected");
-                System.out.println(clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort() + " has disconnected");
-            }
+            System.out.println("Broadcasting \n" + message);
+            curr.sendMessage(message);
         }
     }
 
+    public boolean lockCell(int row, int col) {
+        boolean result = gameBoard.lockCell(row, col);
+        broadcastMessages(null, gameBoard.toString());
+        return result;
+    }
+
+    public boolean unlockCell(int row, int col) {
+        boolean result = gameBoard.unlockCell(row, col);
+        broadcastMessages(null, gameBoard.toString());
+        return result;
+    }
+
+    public boolean fillCell(int row, int col) {
+        boolean result = gameBoard.fillCell(row, col);
+        broadcastMessages(null, gameBoard.toString());
+        return result;
+    }
 }
