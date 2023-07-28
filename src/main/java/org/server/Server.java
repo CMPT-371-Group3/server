@@ -88,7 +88,7 @@ public class Server {
         new Thread(() -> {
             System.out.println("Listening for connections");
             try {
-                while(!gameStarted) {
+                while(!gameStarted && this.clients.size() < 4) {
                     Socket socket = this.server.accept();
                     ClientHandler newClient = new ClientHandler(socket, this);
                     synchronized (clients) {
