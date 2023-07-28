@@ -108,45 +108,52 @@ public class Server {
             int clientsReady = 0;
             System.out.println("Waiting for clients to be ready");
             while(!gameStarted) {
-                
-                if (this.clients.size() > clientsCount) { // if a new client has joined
-                    clientsCount = this.clients.size();
-                    System.out.println("New client has joined. There are now " + this.clients.size() + " clients");
-                } else if (this.clients.size() < clientsCount) { // if a client has left
-                    clientsCount = this.clients.size();
-                    System.out.println("A client has left. There are now " + this.clients.size() + " clients");
-                }
-
-                // count ready clients
-                int tempClientsReady = 0;
                 synchronized (clients) {
+                    // if a new client has joined
+                    if (this.clients.size() > clientsCount) { 
+                        clientsCount = this.clients.size();
+                        System.out.println("New client has joined. There are now " + this.clients.size() + " clients");
+                    } 
+                    // if a client has left
+                    else if (this.clients.size() < clientsCount) { 
+                        clientsCount = this.clients.size();
+                        System.out.println("A client has left. There are now " + this.clients.size() + " clients");
+                    }
+
+                    // count ready clients
+                    int tempClientsReady = 0;
                     for (ClientHandler client : clients) {
                         if (client.getIsReady()) {
                             tempClientsReady++;
                         }
                     }
-                }
-
-                if (tempClientsReady != clientsReady) { // change in the number of clients ready
-                    System.out.println(tempClientsReady + " clients are ready out of " + this.clients.size());
-                }
-                
-                if (this.clients.size() >= 2) {
-                    if (tempClientsReady == this.clients.size()) { // all clients are ready
-                        startGame();
+                    
+                    // change in the number of clients that are ready
+                    if (tempClientsReady != clientsReady) { 
+                        System.out.println(tempClientsReady + " clients are ready out of " + this.clients.size());
+                        clientsReady = tempClientsReady;
                     }
                     
-                    clientsReady = tempClientsReady;
-                } 
+                    // all clients are ready
+                    if (this.clients.size() >= 2) {
+                        if (clientsReady == this.clients.size()) { 
+                            startGame();
+                        }
+                    } 
+                    
+                }
             }
         }).start();
     }
 
     private void startGame() {
-        System.out.println(clients.size() + " clients have joined and are all ready. Starting game");
+        synchronized (clients) {
+            System.out.println(clients.size() + " clients have joined and are all ready. Starting game");
+        }
+        
         gameStarted = true;
         broadcastMessages(null, "START");
-        broadcastMessages(null, gameBoard.toString());
+        onBoardChange();
     }
     
 
@@ -250,34 +257,48 @@ public class Server {
         //     }
         // }
 
-        // send to all clients
-        for (ClientHandler curr : clients) {
-            System.out.println("Broadcasting \n" + message);
-            curr.sendMessage(message);
-        }
+        synchronized (clients) {
+            // send to all clients
+            for (ClientHandler curr : clients) {
+                System.out.println("Broadcasting \n" + message);
+                curr.sendMessage(message);
+            }
 
-        System.out.println(message);
+            System.out.println(message);
+        }
     }
 
     public boolean lockCell(int row, int col) {
         if (!gameStarted) { return false; }
         boolean result = gameBoard.lockCell(row, col);
         System.out.println("Locking cell " + row + ", " + col + " " + result);
-        broadcastMessages(null, gameBoard.toString());
+        onBoardChange();
         return result;
     }
 
     public boolean unlockCell(int row, int col) {
         if (!gameStarted) { return false; }
         boolean result = gameBoard.unlockCell(row, col);
-        broadcastMessages(null, gameBoard.toString());
+        onBoardChange();
         return result;
     }
 
     public boolean fillCell(int row, int col) {
         if (!gameStarted) { return false; }
         boolean result = gameBoard.fillCell(row, col);
-        broadcastMessages(null, gameBoard.toString());
+        onBoardChange();
         return result;
+    }
+
+    private void onBoardChange() {
+        broadcastMessages(null, "BOARD");
+        broadcastMessages(null, gameBoard.toString());
+    }
+
+    public void removeClient(ClientHandler client) {
+        synchronized (clients) {
+            clients.remove(client);
+            System.out.println("removed a client");
+        }
     }
 }
