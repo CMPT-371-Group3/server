@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Server {
-    private ArrayList<ClientHandler> clients;
+    private volatile ArrayList<ClientHandler> clients;
     private ServerSocket server;
     private final long MILLISECONDS_IN_A_MINUTE = 60000;
     private GameBoard gameBoard;
@@ -222,14 +222,16 @@ public class Server {
         }
     }
 
-    public boolean lockCell(int row, int col) {
-        boolean result = gameBoard.lockCell(row, col);
+    public boolean lockCell(int row, int col, ClientHandler c) {
+        boolean result = gameBoard.lockCell(row, col, c);
+        System.out.println("cell has been locked");
         broadcastMessages(null, gameBoard.toString());
         return result;
     }
 
-    public boolean unlockCell(int row, int col) {
-        boolean result = gameBoard.unlockCell(row, col);
+    public boolean unlockCell(int row, int col, ClientHandler c) {
+        boolean result = gameBoard.unlockCell(row, col, c);
+        System.out.println("cell has been unlocked");
         broadcastMessages(null, gameBoard.toString());
         return result;
     }
