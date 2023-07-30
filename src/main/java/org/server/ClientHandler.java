@@ -64,14 +64,15 @@ public class ClientHandler implements Runnable {
                         // tokens[1] in format x,y
                         Integer[] coords = {Integer.parseInt(tokens[1].split(",")[0]), Integer.parseInt(tokens[1].split(",")[1])};
                         System.out.println("coords: " + coords[0] + " " + coords[1]);
-                        boolean returnval = server.lockCell(coords[0], coords[1]); 
-                        System.out.println("has been locked? " + returnval);
+                        boolean returnval = server.lockCell(coords[0], coords[1], this); 
+                        System.out.println(this + " has locked? " + returnval);
                         //line = this.in.readLine();
                         break;
                     }
                     case "UNLOCK": {
                         Integer[] coords = {Integer.parseInt(tokens[1].split(",")[0]), Integer.parseInt(tokens[1].split(",")[1])};
-                        server.unlockCell(coords[0], coords[1]);
+                        boolean returnval = server.unlockCell(coords[0], coords[1], this);
+                        System.out.println(this + " has unlocked? " + returnval);
                         break;
                     }
                     case "FILL": {

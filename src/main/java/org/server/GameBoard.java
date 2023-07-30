@@ -21,16 +21,15 @@ public class GameBoard {
         }
     }
 
-    public boolean lockCell(int x, int y) {
+    public boolean lockCell(int x, int y, ClientHandler c) {
         if (!checkBounds(x, y)) { return false; }
-        return Board.get(x).get(y).setLocked();
+        return Board.get(x).get(y).setLocked(c);
     }
 
-    public boolean unlockCell(int x, int y) {
+    public boolean unlockCell(int x, int y, ClientHandler c) {
         if (!checkBounds(x, y)) { return false; }
 
-        Board.get(x).get(y).unlock();
-        return true;
+        return Board.get(x).get(y).unlock(c);
     }
 
     public boolean fillCell(int x, int y) {
