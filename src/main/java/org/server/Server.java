@@ -108,7 +108,14 @@ public class Server {
             int clientsReady = 0;
             System.out.println("Waiting for clients to be ready");
             while(!gameStarted) {
+                // sleep for a second before checking again
+                try {
+                    Thread.sleep(1000);
+                } catch (Exception e) {
+                    System.out.println("Error: " + e.getMessage());
+                }
                 synchronized (clients) {
+                    System.out.println("Checking if clients are ready");
                     // if a new client has joined
                     if (this.clients.size() > clientsCount) { 
                         clientsCount = this.clients.size();
