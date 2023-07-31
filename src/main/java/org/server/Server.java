@@ -115,7 +115,6 @@ public class Server {
                     System.out.println("Error: " + e.getMessage());
                 }
                 synchronized (clients) {
-                    System.out.println("Checking if clients are ready");
                     // if a new client has joined
                     if (this.clients.size() > clientsCount) { 
                         clientsCount = this.clients.size();
