@@ -31,6 +31,8 @@ public class Client {
                         switch (tokens[0]) {
                             case "EXIT":
                                 return;
+                            case "LOCK":
+                            case "UNLOCK":
                             case "MESSAGE":
                                 System.out.println("\nIncoming: MESSAGE");
                                 String message = client.getInput().readLine();
@@ -41,12 +43,13 @@ public class Client {
                                 client.getOutput().println(message);
                                 client.getOutput().flush();
                                 System.out.println("" + client.getInput().readLine());
+                                /*
                                 synchronized(lock) {
                                     client.setMsgSent(true);
                                     lock.notifyAll();
                                 }
+                                */
                                 break;
-                            case "LOCK":
                                 
                             default:
                                 if (serverMessage.length() > 0)

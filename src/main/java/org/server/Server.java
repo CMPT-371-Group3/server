@@ -275,17 +275,18 @@ public class Server {
         }
     }
 
-    public boolean lockCell(int row, int col) {
+    public boolean lockCell(int row, int col, ClientHandler c) {
         if (!gameStarted) { return false; }
-        boolean result = gameBoard.lockCell(row, col);
+        boolean result = gameBoard.lockCell(row, col, c);
         System.out.println("Locking cell " + row + ", " + col + " " + result);
         onBoardChange();
         return result;
     }
 
-    public boolean unlockCell(int row, int col) {
+    public boolean unlockCell(int row, int col, ClientHandler c) {
         if (!gameStarted) { return false; }
-        boolean result = gameBoard.unlockCell(row, col);
+        boolean result = gameBoard.unlockCell(row, col, c);
+        System.out.println("cell has been unlocked");
         onBoardChange();
         return result;
     }

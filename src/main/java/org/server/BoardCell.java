@@ -10,12 +10,18 @@ public class BoardCell {
 
     // if client has completed colouring
     private boolean isFilled = false;
+    
+    private ClientHandler lockedBy = null;
 
-    /*
-    public Client getLockedBy() {
+    public ClientHandler getLockedBy() {
         return lockedBy;
     }
 
+    public void setLockedBy(ClientHandler c) {
+       this.lockedBy = c; 
+    }
+    /*
+    
     public boolean setLockedBy(Client client) {
         // lock if not already locked
         if (lockedBy != null) {
@@ -31,15 +37,15 @@ public class BoardCell {
     }
     */
 
-    public boolean setLocked() {
-        if (locked) {
-            return false;
-        }
+    public boolean setLocked(ClientHandler c) {
+        // if (locked) {
+        //     return false;
+        // }
 
         if (!sema.tryAcquire()) {
             return false;
         }
-
+        setLockedBy(c);
         locked = true;
         return true;
     }
@@ -48,9 +54,15 @@ public class BoardCell {
         return locked;
     }
 
-    public void unlock() {
-        locked = false;
-        sema.release();
+    public boolean unlock(ClientHandler c) {
+        System.out.println(c + " trying to unlock");
+        if (c == lockedBy) {
+            setLockedBy(null);
+            locked = false;
+            sema.release();
+            return true;
+        }
+        return false;
     }
 
     public boolean getIsFilled() {
