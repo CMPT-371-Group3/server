@@ -40,19 +40,19 @@ public class ClientHandler implements Runnable {
     
 
     public void sendMessage(String message) {
-        System.out.println(this.getClientSocket().getPort() + " " + message);
+        //System.out.println(this.getClientSocket().getPort() + " " + message);
         // this.out.println("BROADCAST");
         this.out.println(message);
     }
 
     public void run() {
         try {
-            System.out.println(clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort() + " has connected");
+            //System.out.println(clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort() + " has connected");
             this.out.println(clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort());
             String line = this.in.readLine();
-            System.out.print(clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort() + " selected option: " + line);                
+            //System.out.print(clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort() + " selected option: " + line);                
             while (line != null && !line.equalsIgnoreCase("exit")) {
-                System.out.println("Incoming: " + line);
+                //System.out.println("Incoming: " + line);
                 // parse line
                 String[] tokens = line.split("/");
                 switch (tokens[0]) {
@@ -60,7 +60,7 @@ public class ClientHandler implements Runnable {
                         server.broadcastMessages(this, "\n" + this.clientSocket.getInetAddress().getHostAddress() + ":" + this.clientSocket.getPort() + " has connected");
                         break;
                     case "LOCK": {
-                        System.out.println("processing LOCK");
+                        //System.out.println("processing LOCK");
                         // tokens[1] in format x,y
                         Integer[] coords = {Integer.parseInt(tokens[1].split(",")[0]), Integer.parseInt(tokens[1].split(",")[1])};
                         System.out.println("coords: " + coords[0] + " " + coords[1]);
@@ -81,15 +81,18 @@ public class ClientHandler implements Runnable {
                         break;
                     }
                     case "EXIT":
-                        System.out.println("EXIT");
+                        //System.out.println("EXIT");
                         this.out.println("EXIT");
+                        break;
+                    case "READY":
+                        this.isReady = true;
                         break;
                     default:
                 }
-                System.out.print(clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort() + " selected option: ");
+                //System.out.print(clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort() + " selected option: ");
                 line = in.readLine();
-                System.out.println(line);
-                System.out.println();
+                //System.out.println(line);
+                //System.out.println();
             }
         } catch(IOException e) {
             e.printStackTrace();
@@ -106,7 +109,8 @@ public class ClientHandler implements Runnable {
                 e.printStackTrace();
             }                
             server.broadcastMessages(this, clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort() + " has disconnected");
-            System.out.println(clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort() + " has disconnected");
+            //System.out.println(clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort() + " has disconnected");
+            server.removeClient(this);
         }
 
         
