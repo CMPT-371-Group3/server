@@ -294,6 +294,10 @@ public class Server {
         if (!gameStarted) { return false; }
         boolean result = gameBoard.fillCell(row, col);
         onBoardChange();
+        boolean isFinished = gameBoard.checkState(clients);
+        if(isFinished) {
+            gameBoard.getWinner(this, clients);
+        }
         return result;
     }
 
