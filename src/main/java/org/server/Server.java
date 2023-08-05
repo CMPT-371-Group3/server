@@ -90,8 +90,21 @@ public class Server {
             try {
                 while(!gameStarted && this.clients.size() < 4) {
                     Socket socket = this.server.accept();
-                    ClientHandler newClient = new ClientHandler(socket, this);
+                    ClientHandler newClient = null;
                     synchronized (clients) {
+                        // overly complicated way to calculate what number hasnt been used lol
+                        boolean[] playerNums = {false, false, false, false};
+                        for (ClientHandler client : clients) {
+                            playerNums[client.getPlayerNumber()] = true;
+                        }
+                        
+                        for (int i = 0; i < playerNums.length; i++) {
+                            if (!playerNums[i]) {
+                                newClient = new ClientHandler(socket, this, i);
+                                break;
+                            }
+                        }
+
                         clients.add(newClient);
                     }
                     new Thread(newClient).start();

@@ -18,14 +18,18 @@ public class ClientHandler implements Runnable {
     private Client client;
     private boolean isReady = false;
     private Server server;
+    private int playerNumber;
     
-    public ClientHandler(Socket socket, Server server) {
+    public ClientHandler(Socket socket, Server server, int playerNumber) {
         this.clientSocket = socket;
         try {
             this.out = new PrintWriter(clientSocket.getOutputStream(), true);
             this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             this.sc = new Scanner(System.in);
             this.server = server;
+            this.playerNumber = playerNumber;
+
+            sendMessage("PLAYER_NUMBER/" + playerNumber);
         } catch (IOException e) {
             e.printStackTrace();
             this.out = null;
@@ -118,5 +122,9 @@ public class ClientHandler implements Runnable {
 
     public boolean getIsReady() {
         return this.isReady;
+    }
+
+    public int getPlayerNumber() {
+        return this.playerNumber;
     }
 } 
