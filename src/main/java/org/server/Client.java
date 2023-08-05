@@ -16,7 +16,7 @@ public class Client {
     private static final Object lock = new Object();
     public static void main(String args[]) {
         try {
-            Client client = new Client("localhost", 6000);
+            Client client = new Client("34.67.92.136", 6000);
             String address = client.getInput().readLine();
             client.setAddressWithPort(address);
             String line = null;
