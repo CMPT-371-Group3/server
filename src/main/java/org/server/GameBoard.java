@@ -58,9 +58,6 @@ public class GameBoard {
             for(int j = 0; j < Board.get(i).size(); j++) {
                 if(Board.get(i).get(j).getIsFilled()) {
                     counter++;
-                    if (clientHandlers.indexOf(Board.get(i).get(j).getLockedBy()) != -1) {
-                        return false;
-                    }
                     clients[clientHandlers.indexOf(Board.get(i).get(j).getLockedBy())]++;
                 }
             }
