@@ -81,7 +81,7 @@ public class ClientHandler implements Runnable {
                     }
                     case "FILL": {
                         Integer[] coords = {Integer.parseInt(tokens[1].split(",")[0]), Integer.parseInt(tokens[1].split(",")[1])};
-                        boolean result = server.fillCell(coords[0], coords[1]);
+                        boolean result = server.fillCell(coords[0], coords[1], this);
                         break;
                     }
                     case "EXIT":

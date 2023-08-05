@@ -290,7 +290,7 @@ public class Server {
     public boolean lockCell(int row, int col, ClientHandler c) {
         if (!gameStarted) { return false; }
         boolean result = gameBoard.lockCell(row, col, c);
-        if (result) { broadcastMessages(null, "LOCK/" + row + "," + col); }
+        if (result) { broadcastMessages(null, "LOCK/" + row + "," + col + "/" + c.getPlayerNumber()); }
         System.out.println("Locking cell " + row + ", " + col + " " + result);
         onBoardChange();
         return result;
@@ -299,16 +299,16 @@ public class Server {
     public boolean unlockCell(int row, int col, ClientHandler c) {
         if (!gameStarted) { return false; }
         boolean result = gameBoard.unlockCell(row, col, c);
-        if (result) { broadcastMessages(null, "UNLOCK/" + row + "," + col); }
+        if (result) { broadcastMessages(null, "UNLOCK/" + row + "," + col + "/" + c.getPlayerNumber()); }
         System.out.println("cell has been unlocked");
         onBoardChange();
         return result;
     }
 
-    public boolean fillCell(int row, int col) {
+    public boolean fillCell(int row, int col, ClientHandler c) {
         if (!gameStarted) { return false; }
         boolean result = gameBoard.fillCell(row, col);
-        if (result) { broadcastMessages(null, "FILL/" + row + "," + col); }
+        if (result) { broadcastMessages(null, "FILL/" + row + "," + col + "/" + c.getPlayerNumber()); }
         onBoardChange();
         return result;
     }
