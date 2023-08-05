@@ -290,7 +290,7 @@ public class Server {
     public boolean lockCell(int row, int col, ClientHandler c) {
         if (!gameStarted) { return false; }
         boolean result = gameBoard.lockCell(row, col, c);
-        if (result) { broadcastMessages(null, "UNLOCK/" + row + "," + col); }
+        if (result) { broadcastMessages(null, "LOCK/" + row + "," + col); }
         System.out.println("Locking cell " + row + ", " + col + " " + result);
         onBoardChange();
         return result;
@@ -308,7 +308,7 @@ public class Server {
     public boolean fillCell(int row, int col) {
         if (!gameStarted) { return false; }
         boolean result = gameBoard.fillCell(row, col);
-        if (result) { broadcastMessages(null, "UNLOCK/" + row + "," + col); }
+        if (result) { broadcastMessages(null, "FILL/" + row + "," + col); }
         onBoardChange();
         return result;
     }
