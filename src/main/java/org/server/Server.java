@@ -95,12 +95,13 @@ public class Server {
                         // overly complicated way to calculate what number hasnt been used lol
                         boolean[] playerNums = {false, false, false, false};
                         for (ClientHandler client : clients) {
-                            playerNums[client.getPlayerNumber()] = true;
+                            // playerNums starts from 1
+                            playerNums[client.getPlayerNumber() - 1] = true; 
                         }
-                        
+
                         for (int i = 0; i < playerNums.length; i++) {
                             if (!playerNums[i]) {
-                                newClient = new ClientHandler(socket, this, i);
+                                newClient = new ClientHandler(socket, this, i + 1);
                                 break;
                             }
                         }
