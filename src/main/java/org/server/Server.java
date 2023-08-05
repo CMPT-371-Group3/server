@@ -315,7 +315,7 @@ public class Server {
         return result;
     }
 
-    public boolean fillCell(int row, int col, ClientHandler c) {
+    public synchronized boolean fillCell(int row, int col, ClientHandler c) {
         if (!gameStarted) { return false; }
         boolean result = gameBoard.fillCell(row, col);
         if (result) { broadcastMessages(null, "FILL/" + row + "," + col + "/" + c.getPlayerNumber()); }
