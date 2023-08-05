@@ -276,21 +276,21 @@ public class Server {
         //         curr.sendMessage("");
         //     }
         // }
-
+        
+        System.out.println("Broadcasting \n" + message);
         synchronized (clients) {
             // send to all clients
             for (ClientHandler curr : clients) {
-                System.out.println("Broadcasting \n" + message);
+                
                 curr.sendMessage(message);
             }
-
-            System.out.println(message);
         }
     }
 
     public boolean lockCell(int row, int col, ClientHandler c) {
         if (!gameStarted) { return false; }
         boolean result = gameBoard.lockCell(row, col, c);
+        if (result) { broadcastMessages(null, "UNLOCK/" + row + "," + col); }
         System.out.println("Locking cell " + row + ", " + col + " " + result);
         onBoardChange();
         return result;
@@ -299,6 +299,7 @@ public class Server {
     public boolean unlockCell(int row, int col, ClientHandler c) {
         if (!gameStarted) { return false; }
         boolean result = gameBoard.unlockCell(row, col, c);
+        if (result) { broadcastMessages(null, "UNLOCK/" + row + "," + col); }
         System.out.println("cell has been unlocked");
         onBoardChange();
         return result;
@@ -307,6 +308,7 @@ public class Server {
     public boolean fillCell(int row, int col) {
         if (!gameStarted) { return false; }
         boolean result = gameBoard.fillCell(row, col);
+        if (result) { broadcastMessages(null, "UNLOCK/" + row + "," + col); }
         onBoardChange();
         return result;
     }
