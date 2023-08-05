@@ -12,17 +12,23 @@ public class Server {
     private volatile GameBoard gameBoard;
     private HashMap<String, String> map;
     private boolean gameStarted = false;
+    private int portNumber;
 
     public Server(int portNumber) {
-        // Create an ArrayList for Clients and save the Port Number then create a ServerSocket
         try {
-            this.clients = new ArrayList<>();
+            this.portNumber = portNumber;
             this.server = new ServerSocket(portNumber);
-            this.gameBoard = new GameBoard(8, 8);
-            map = new HashMap<String, String>();
+            // Create an ArrayList for Clients and save the Port Number then create a ServerSocket
+            init();
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
+    }
+
+    private void init() {
+        this.gameBoard = new GameBoard(8, 8);
+        this.clients = new ArrayList<>();
+        startServer();
     }
 
     /* 
@@ -90,8 +96,22 @@ public class Server {
             try {
                 while(!gameStarted && this.clients.size() < 4) {
                     Socket socket = this.server.accept();
-                    ClientHandler newClient = new ClientHandler(socket, this);
+                    ClientHandler newClient = null;
                     synchronized (clients) {
+                        // overly complicated way to calculate what number hasnt been used lol
+                        boolean[] playerNums = {false, false, false, false};
+                        for (ClientHandler client : clients) {
+                            // playerNums starts from 1
+                            playerNums[client.getPlayerNumber() - 1] = true; 
+                        }
+
+                        for (int i = 0; i < playerNums.length; i++) {
+                            if (!playerNums[i]) {
+                                newClient = new ClientHandler(socket, this, i + 1);
+                                break;
+                            }
+                        }
+
                         clients.add(newClient);
                     }
                     new Thread(newClient).start();
@@ -161,6 +181,12 @@ public class Server {
         broadcastMessages(null, "START");
         onBoardChange();
     }
+
+    private void checkRestart() {
+        if (clients.size() == 0) {
+            init();
+        }
+    }
     
 
     /*
@@ -215,7 +241,7 @@ public class Server {
         } else if (this.clients.size() < 5) {
             this.clients.forEach(client -> client.sendMessage(Tokens.START.name() + "; Beginning Game;"));
             this.startGame();
-        } else {
+        } else { 
             for(int i = 0; i < 4; i++) {
                 this.clients.get(0).sendMessage(Tokens.START.name() + "; Beginning Game");
             }
@@ -262,21 +288,19 @@ public class Server {
         //         curr.sendMessage("");
         //     }
         // }
-
-        synchronized (clients) {
+        
+        System.out.println("Broadcasting \n" + message);
             // send to all clients
-            for (ClientHandler curr : clients) {
-                System.out.println("Broadcasting \n" + message);
-                curr.sendMessage(message);
-            }
-
-            System.out.println(message);
+        for (ClientHandler curr : clients) {
+            
+            curr.sendMessage(message);
         }
     }
 
     public boolean lockCell(int row, int col, ClientHandler c) {
         if (!gameStarted) { return false; }
         boolean result = gameBoard.lockCell(row, col, c);
+        if (result) { broadcastMessages(null, "LOCK/" + row + "," + col + "/" + c.getPlayerNumber()); }
         System.out.println("Locking cell " + row + ", " + col + " " + result);
         onBoardChange();
         return result;
@@ -285,20 +309,22 @@ public class Server {
     public boolean unlockCell(int row, int col, ClientHandler c) {
         if (!gameStarted) { return false; }
         boolean result = gameBoard.unlockCell(row, col, c);
+        if (result) { broadcastMessages(null, "UNLOCK/" + row + "," + col + "/" + c.getPlayerNumber()); }
         System.out.println("cell has been unlocked");
         onBoardChange();
         return result;
     }
 
-    public boolean fillCell(int row, int col) {
+    public synchronized boolean fillCell(int row, int col, ClientHandler c) {
         if (!gameStarted) { return false; }
         boolean result = gameBoard.fillCell(row, col);
+        if (result) { broadcastMessages(null, "FILL/" + row + "," + col + "/" + c.getPlayerNumber()); }
         onBoardChange();
         boolean isFinished = gameBoard.checkState(clients);
         if(isFinished) {
             gameBoard.getWinner(this, clients);
         }
-        return result;
+        return result; 
     }
 
     private void onBoardChange() {
@@ -310,6 +336,7 @@ public class Server {
         synchronized (clients) {
             clients.remove(client);
             System.out.println("removed a client");
+            checkRestart();
         }
     }
 }

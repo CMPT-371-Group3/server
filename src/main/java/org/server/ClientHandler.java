@@ -18,15 +18,19 @@ public class ClientHandler implements Runnable {
     private Client client;
     private boolean isReady = false;
     private Server server;
+    private int playerNumber;
     
-    public ClientHandler(Socket socket, Server server) {
+    public ClientHandler(Socket socket, Server server, int playerNumber) {
         this.clientSocket = socket;
         try {
             this.out = new PrintWriter(clientSocket.getOutputStream(), true);
             this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             this.sc = new Scanner(System.in);
             this.server = server;
-        } catch (IOException e) {
+            this.playerNumber = playerNumber;
+            sendMessage("PLAYER_NUMBER/" + playerNumber);
+            
+        } catch (IOException e) { 
             e.printStackTrace();
             this.out = null;
             this.in = null;
@@ -64,20 +68,20 @@ public class ClientHandler implements Runnable {
                         // tokens[1] in format x,y
                         Integer[] coords = {Integer.parseInt(tokens[1].split(",")[0]), Integer.parseInt(tokens[1].split(",")[1])};
                         System.out.println("coords: " + coords[0] + " " + coords[1]);
-                        boolean returnval = server.lockCell(coords[0], coords[1], this); 
-                        System.out.println(this + " has locked? " + returnval);
+                        boolean result = server.lockCell(coords[0], coords[1], this);
+                        System.out.println(this + " has locked? " + result);
                         //line = this.in.readLine();
                         break;
                     }
                     case "UNLOCK": {
                         Integer[] coords = {Integer.parseInt(tokens[1].split(",")[0]), Integer.parseInt(tokens[1].split(",")[1])};
-                        boolean returnval = server.unlockCell(coords[0], coords[1], this);
-                        System.out.println(this + " has unlocked? " + returnval);
+                        boolean result = server.unlockCell(coords[0], coords[1], this);
+                        System.out.println(this + " has unlocked? " + result);
                         break;
                     }
                     case "FILL": {
                         Integer[] coords = {Integer.parseInt(tokens[1].split(",")[0]), Integer.parseInt(tokens[1].split(",")[1])};
-                        server.fillCell(coords[0], coords[1]);
+                        boolean result = server.fillCell(coords[0], coords[1], this);
                         break;
                     }
                     case "EXIT":
@@ -118,5 +122,9 @@ public class ClientHandler implements Runnable {
 
     public boolean getIsReady() {
         return this.isReady;
+    }
+
+    public int getPlayerNumber() {
+        return this.playerNumber;
     }
 } 
