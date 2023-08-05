@@ -28,8 +28,8 @@ public class ClientHandler implements Runnable {
             this.sc = new Scanner(System.in);
             this.server = server;
             this.playerNumber = playerNumber;
-
             sendMessage("PLAYER_NUMBER/" + playerNumber);
+            
         } catch (IOException e) {
             e.printStackTrace();
             this.out = null;
@@ -68,20 +68,23 @@ public class ClientHandler implements Runnable {
                         // tokens[1] in format x,y
                         Integer[] coords = {Integer.parseInt(tokens[1].split(",")[0]), Integer.parseInt(tokens[1].split(",")[1])};
                         System.out.println("coords: " + coords[0] + " " + coords[1]);
-                        boolean returnval = server.lockCell(coords[0], coords[1], this); 
-                        System.out.println(this + " has locked? " + returnval);
+                        boolean result = server.lockCell(coords[0], coords[1], this); 
+                        if (result) { sendMessage(line); }
+                        System.out.println(this + " has locked? " + result);
                         //line = this.in.readLine();
                         break;
                     }
                     case "UNLOCK": {
                         Integer[] coords = {Integer.parseInt(tokens[1].split(",")[0]), Integer.parseInt(tokens[1].split(",")[1])};
-                        boolean returnval = server.unlockCell(coords[0], coords[1], this);
-                        System.out.println(this + " has unlocked? " + returnval);
+                        boolean result = server.unlockCell(coords[0], coords[1], this);
+                        if (result) { sendMessage(line); }
+                        System.out.println(this + " has unlocked? " + result);
                         break;
                     }
                     case "FILL": {
                         Integer[] coords = {Integer.parseInt(tokens[1].split(",")[0]), Integer.parseInt(tokens[1].split(",")[1])};
-                        server.fillCell(coords[0], coords[1]);
+                        boolean result = server.fillCell(coords[0], coords[1]);
+                        if (result) { sendMessage(line); }
                         break;
                     }
                     case "EXIT":
