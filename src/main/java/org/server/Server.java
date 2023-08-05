@@ -19,14 +19,6 @@ public class Server {
             this.portNumber = portNumber;
             this.server = new ServerSocket(portNumber);
             // Create an ArrayList for Clients and save the Port Number then create a ServerSocket
-            init(portNumber);
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
-
-    public void init(int portNumber) {
-        try {
             this.gameBoard = new GameBoard(8, 8);
             this.clients = new ArrayList<>();
             startServer();
@@ -35,15 +27,6 @@ public class Server {
         }
     }
 
-    /**
-     * reset after all clients have left
-     */
-    private void checkReset() {
-        if (clients.size() == 0) {
-            System.out.println("No clients left. Resetting game");
-            init(server.getLocalPort());
-        }
-    }
     /* 
     public void addClient(ClientHandler client) {
         // Add a client to the ArrayList if we are not full, otherwise disconnect them
@@ -248,7 +231,7 @@ public class Server {
         } else if (this.clients.size() < 5) {
             this.clients.forEach(client -> client.sendMessage(Tokens.START.name() + "; Beginning Game;"));
             this.startGame();
-        } else {
+        } else { 
             for(int i = 0; i < 4; i++) {
                 this.clients.get(0).sendMessage(Tokens.START.name() + "; Beginning Game");
             }
@@ -297,12 +280,10 @@ public class Server {
         // }
         
         System.out.println("Broadcasting \n" + message);
-        synchronized (clients) {
             // send to all clients
-            for (ClientHandler curr : clients) {
-                
-                curr.sendMessage(message);
-            }
+        for (ClientHandler curr : clients) {
+            
+            curr.sendMessage(message);
         }
     }
 
@@ -329,6 +310,10 @@ public class Server {
         boolean result = gameBoard.fillCell(row, col);
         if (result) { broadcastMessages(null, "FILL/" + row + "," + col + "/" + c.getPlayerNumber()); }
         onBoardChange();
+        boolean isFinished = gameBoard.checkState(clients);
+        if(isFinished) {
+            gameBoard.getWinner(this, clients);
+        }
         return result;
     }
 
@@ -341,7 +326,6 @@ public class Server {
         synchronized (clients) {
             clients.remove(client);
             System.out.println("removed a client");
-            checkReset();
         }
     }
 }

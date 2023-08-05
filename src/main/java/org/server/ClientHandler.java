@@ -30,7 +30,7 @@ public class ClientHandler implements Runnable {
             this.playerNumber = playerNumber;
             sendMessage("PLAYER_NUMBER/" + playerNumber);
             
-        } catch (IOException e) {
+        } catch (IOException e) { 
             e.printStackTrace();
             this.out = null;
             this.in = null;
