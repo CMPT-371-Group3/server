@@ -336,7 +336,7 @@ public class Server {
         synchronized (clients) {
             clients.remove(client);
             System.out.println("removed a client");
-            checkReady();
+            checkRestart();
         }
     }
 }
