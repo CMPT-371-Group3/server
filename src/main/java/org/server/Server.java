@@ -12,19 +12,38 @@ public class Server {
     private volatile GameBoard gameBoard;
     private HashMap<String, String> map;
     private boolean gameStarted = false;
+    private int portNumber;
 
     public Server(int portNumber) {
-        // Create an ArrayList for Clients and save the Port Number then create a ServerSocket
         try {
-            this.clients = new ArrayList<>();
+            this.portNumber = portNumber;
             this.server = new ServerSocket(portNumber);
-            this.gameBoard = new GameBoard(8, 8);
-            map = new HashMap<String, String>();
+            // Create an ArrayList for Clients and save the Port Number then create a ServerSocket
+            init(portNumber);
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
 
+    public void init(int portNumber) {
+        try {
+            this.gameBoard = new GameBoard(8, 8);
+            this.clients = new ArrayList<>();
+            startServer();
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    /**
+     * reset after all clients have left
+     */
+    private void checkReset() {
+        if (clients.size() == 0) {
+            System.out.println("No clients left. Resetting game");
+            init(server.getLocalPort());
+        }
+    }
     /* 
     public void addClient(ClientHandler client) {
         // Add a client to the ArrayList if we are not full, otherwise disconnect them
@@ -322,6 +341,7 @@ public class Server {
         synchronized (clients) {
             clients.remove(client);
             System.out.println("removed a client");
+            checkReset();
         }
     }
 }
