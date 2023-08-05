@@ -70,6 +70,7 @@ public class BoardCell {
     }
 
     public void setIsFilled() {
-        isFilled = true;
+        if(locked)
+            isFilled = true;
     }
 }
