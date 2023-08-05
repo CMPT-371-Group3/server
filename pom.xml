@@ -31,7 +31,7 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>1.4.0</version>
         <configuration>
-          <mainClass>org.server.App</mainClass>
+          <mainClass>org.server.App</mainClass> 
         </configuration>
       </plugin>
     </plugins>

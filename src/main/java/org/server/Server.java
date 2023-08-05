@@ -324,7 +324,7 @@ public class Server {
         if(isFinished) {
             gameBoard.getWinner(this, clients);
         }
-        return result;
+        return result; 
     }
 
     private void onBoardChange() {
