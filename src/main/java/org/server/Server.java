@@ -19,12 +19,16 @@ public class Server {
             this.portNumber = portNumber;
             this.server = new ServerSocket(portNumber);
             // Create an ArrayList for Clients and save the Port Number then create a ServerSocket
-            this.gameBoard = new GameBoard(8, 8);
-            this.clients = new ArrayList<>();
-            startServer();
+            init();
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
+    }
+
+    private void init() {
+        this.gameBoard = new GameBoard(8, 8);
+        this.clients = new ArrayList<>();
+        startServer();
     }
 
     /* 
@@ -177,6 +181,12 @@ public class Server {
         broadcastMessages(null, "START");
         onBoardChange();
     }
+
+    private void checkRestart() {
+        if (clients.size() == 0) {
+            init();
+        }
+    }
     
 
     /*
@@ -326,6 +336,7 @@ public class Server {
         synchronized (clients) {
             clients.remove(client);
             System.out.println("removed a client");
+            checkReady();
         }
     }
 }
