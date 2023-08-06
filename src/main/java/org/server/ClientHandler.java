@@ -74,10 +74,10 @@ public class ClientHandler implements Runnable {
                         break;
                     }
                     case "EXIT":
-                        System.out.println("Player: " + playerNumber + " has disconnected!");
                         this.server.broadcastMessages("Player: " + playerNumber + " has disconnected!");
                         this.out.println("EXIT");
                         this.disconnect();
+                        server.removeClient(this);
                         break;
                     case "READY":
                         this.isReady = true;
