@@ -84,13 +84,22 @@ public class GameBoard {
         }
         int max = 0;
         int maxIndex = -1;
+        int maxIndexTie = -1;
+        boolean isTie = false;
         for(int i = 0; i < clientHandlers.size(); i++) {
             if(clients[i] > max) {
                 max = clients[i];
                 maxIndex = i;
+            } else if(clients[i] == max) {
+                isTie = true;
+                maxIndexTie = i;
             }
         }
-        server.broadcastMessages("STOP/" + clientHandlers.get(maxIndex).getPlayerNumber());
+        if(isTie)
+            server.broadcastMessages("STOP/" + clientHandlers.get(maxIndex).getPlayerNumber() + ","
+                    + clientHandlers.get(maxIndexTie).getPlayerNumber());
+        else
+            server.broadcastMessages("STOP/" + clientHandlers.get(maxIndex).getPlayerNumber());
     }
 
     private boolean checkOutOfBounds(int x, int y) {
