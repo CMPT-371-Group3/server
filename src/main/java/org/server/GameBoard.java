@@ -1,13 +1,12 @@
 package org.server;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class GameBoard {
-    private int Rows;
-    private int Cols;
+    private final int Rows;
+    private final int Cols;
 
-    private ArrayList<ArrayList<BoardCell>> Board = new ArrayList<ArrayList<BoardCell>>();
+    private final ArrayList<ArrayList<BoardCell>> Board = new ArrayList<>();
 
     public GameBoard(int rows, int cols) {
         this.Rows = rows;
@@ -15,7 +14,7 @@ public class GameBoard {
 
         // add cells to the array list
         for (int i = 0; i < Rows; i++) {
-            Board.add(new ArrayList<BoardCell>());
+            Board.add(new ArrayList<>());
             for (int j = 0; j < Cols; j++) {
                 Board.get(i).add(new BoardCell());
             }
@@ -23,26 +22,26 @@ public class GameBoard {
     }
 
     public boolean lockCell(int x, int y, ClientHandler c) {
-        if (!checkBounds(x, y)) { return false; }
+        if (checkOutOfBounds(x, y)) return false;
         return Board.get(x).get(y).setLocked(c);
     }
 
     public boolean unlockCell(int x, int y, ClientHandler c) {
-        if (!checkBounds(x, y)) { return false; }
+        if (checkOutOfBounds(x, y)) return false;
 
         return Board.get(x).get(y).unlock(c);
     }
 
-    public boolean fillCell(int x, int y) {
-        if (!checkBounds(x, y)) { return false; }
+    public boolean fillCell(int x, int y, ClientHandler c) {
+        if (checkOutOfBounds(x, y)) return false;
 
-        Board.get(x).get(y).setIsFilled();
+        Board.get(x).get(y).setIsFilled(c);
 
         return true;
     }
 
     public boolean isLocked(int x, int y) {
-        if (!checkBounds(x, y)) { return false; }
+        if (checkOutOfBounds(x, y)) return false;
 
         return Board.get(x).get(y).getLocked();
     }
@@ -54,21 +53,19 @@ public class GameBoard {
         for (int i = 0; i < clientHandlers.size(); i++) {
             clients[i] = 0;
         }
-        for (int i = 0; i < Board.size(); i++) {
-            for(int j = 0; j < Board.get(i).size(); j++) {
-                if(Board.get(i).get(j).getIsFilled()) {
+        for (ArrayList<BoardCell> boardCells : Board) {
+            for (BoardCell boardCell : boardCells) {
+                if (boardCell.getIsFilled()) {
                     counter++;
-                    clients[clientHandlers.indexOf(Board.get(i).get(j).getLockedBy())]++;
+                    clients[clientHandlers.indexOf(boardCell.getLockedBy())]++;
                 }
             }
         }
-        if(counter == (Rows * Cols)) {
-            return true;
-        }
+
+        if(counter == (Rows * Cols)) return true;
+
         for (int i = 1; i < clients.length; i++){
-            if(i >= ((Rows * Cols)/2 + 1)) {
-                return true;
-            }
+            if(clients[i] >= ((Rows * Cols)/2 + 1)) return true;
         }
         return false;
     }
@@ -78,10 +75,10 @@ public class GameBoard {
         for (int i = 0; i < clientHandlers.size(); i++) {
             clients[i] = 0;
         }
-        for (int i = 0; i < Board.size(); i++) {
-            for(int j = 0; j < Board.get(i).size(); j++) {
-                if(Board.get(i).get(j).getIsFilled()) {
-                    clients[clientHandlers.indexOf(Board.get(i).get(j).getLockedBy())]++;
+        for (ArrayList<BoardCell> boardCells : Board) {
+            for (BoardCell boardCell : boardCells) {
+                if (boardCell.getIsFilled()) {
+                    clients[clientHandlers.indexOf(boardCell.getLockedBy())]++;
                 }
             }
         }
@@ -93,11 +90,11 @@ public class GameBoard {
                 maxIndex = i;
             }
         }
-        server.broadcastMessages(null, "STOP" + "\n" + "Client " + clientHandlers.get(maxIndex).toString() + " has won the game!");
+        server.broadcastMessages("STOP/" + clientHandlers.get(maxIndex).getPlayerNumber());
     }
 
-    private boolean checkBounds(int x, int y) {
-        return (x >= 0 && x < Rows && y >= 0 && y < Cols);
+    private boolean checkOutOfBounds(int x, int y) {
+        return (x < 0 && x >= Rows && y < 0 && y >= Cols);
     }
 
     public String toString() {
