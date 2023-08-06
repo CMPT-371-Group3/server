@@ -50,8 +50,8 @@ public class BoardCell {
         return isFilled;
     }
 
-    public void setIsFilled() {
-        if(locked)
+    public void setIsFilled(ClientHandler c) {
+        if(locked && lockedBy == c)
             isFilled = true;
     }
 }

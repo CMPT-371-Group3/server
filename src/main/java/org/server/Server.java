@@ -169,7 +169,7 @@ public class Server {
             broadcastMessages("Game has not been started yet. Move has been ignored.");
             return;
         }
-        boolean result = gameBoard.fillCell(row, col);
+        boolean result = gameBoard.fillCell(row, col, c);
 
         if (result) broadcastMessages("FILL/" + row + "," + col + "/" + c.getPlayerNumber());
 

@@ -32,10 +32,10 @@ public class GameBoard {
         return Board.get(x).get(y).unlock(c);
     }
 
-    public boolean fillCell(int x, int y) {
+    public boolean fillCell(int x, int y, ClientHandler c) {
         if (checkOutOfBounds(x, y)) return false;
 
-        Board.get(x).get(y).setIsFilled();
+        Board.get(x).get(y).setIsFilled(c);
 
         return true;
     }
