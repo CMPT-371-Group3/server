@@ -3,20 +3,15 @@ package org.server;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class Server {
     private volatile ArrayList<ClientHandler> clients;
     private ServerSocket server;
-    private final long MILLISECONDS_IN_A_MINUTE = 60000;
     private volatile GameBoard gameBoard;
-    private HashMap<String, String> map;
     private boolean gameStarted = false;
-    private int portNumber;
 
     public Server(int portNumber) {
         try {
-            this.portNumber = portNumber;
             this.server = new ServerSocket(portNumber);
             // Create an ArrayList for Clients and save the Port Number then create a ServerSocket
             init();
@@ -125,7 +120,7 @@ public class Server {
         }
         
         gameStarted = true;
-        broadcastMessages(null, "START");
+        broadcastMessages("START");
         onBoardChange();
     }
 
@@ -135,7 +130,7 @@ public class Server {
         }
     }
     
-    public void broadcastMessages(ClientHandler sender, String message) {
+    public void broadcastMessages(String message) {
         System.out.println("Broadcasting \n" + message);
         // send to all clients
         for (ClientHandler curr : clients) {            
@@ -143,45 +138,57 @@ public class Server {
         }
     }
 
-    public boolean lockCell(int row, int col, ClientHandler c) {
-        if (!gameStarted) { return false; }
+    public void lockCell(int row, int col, ClientHandler c) {
+        if (!gameStarted) {
+            broadcastMessages("Game has not been started yet. Move has been ignored.");
+            return;
+        }
         boolean result = gameBoard.lockCell(row, col, c);
-        if (result) { broadcastMessages(null, "LOCK/" + row + "," + col + "/" + c.getPlayerNumber()); }
+
+        if (result) broadcastMessages("LOCK/" + row + "," + col + "/" + c.getPlayerNumber());
+
         System.out.println("Locking cell " + row + ", " + col + " " + result);
         onBoardChange();
-        return result;
     }
 
-    public boolean unlockCell(int row, int col, ClientHandler c) {
-        if (!gameStarted) { return false; }
+    public void unlockCell(int row, int col, ClientHandler c) {
+        if (!gameStarted) {
+            broadcastMessages("Game has not been started yet. Move has been ignored.");
+            return;
+        }
         boolean result = gameBoard.unlockCell(row, col, c);
-        if (result) { broadcastMessages(null, "UNLOCK/" + row + "," + col + "/" + c.getPlayerNumber()); }
-        System.out.println("cell has been unlocked");
+
+        if (result) broadcastMessages("UNLOCK/" + row + "," + col + "/" + c.getPlayerNumber());
+
+        System.out.println("Cell " + row + ", " + col + " has been unlocked");
         onBoardChange();
-        return result;
     }
 
-    public synchronized boolean fillCell(int row, int col, ClientHandler c) {
-        if (!gameStarted) { return false; }
+    public synchronized void fillCell(int row, int col, ClientHandler c) {
+        if (!gameStarted) {
+            broadcastMessages("Game has not been started yet. Move has been ignored.");
+            return;
+        }
         boolean result = gameBoard.fillCell(row, col);
-        if (result) { broadcastMessages(null, "FILL/" + row + "," + col + "/" + c.getPlayerNumber()); }
+
+        if (result) broadcastMessages("FILL/" + row + "," + col + "/" + c.getPlayerNumber());
+
         onBoardChange();
         boolean isFinished = gameBoard.checkState(clients);
         if(isFinished) {
             gameBoard.getWinner(this, clients);
         }
-        return result; 
     }
 
     private void onBoardChange() {
-        broadcastMessages(null, "BOARD");
-        broadcastMessages(null, gameBoard.toString());
+        broadcastMessages("BOARD");
+        broadcastMessages(gameBoard.toString());
     }
 
     public void removeClient(ClientHandler client) {
         synchronized (clients) {
             clients.remove(client);
-            System.out.println("removed a client");
+            System.out.println("Removed a client");
             checkRestart();
         }
     }
