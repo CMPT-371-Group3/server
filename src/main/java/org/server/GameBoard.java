@@ -90,7 +90,7 @@ public class GameBoard {
                 maxIndex = i;
             }
         }
-        server.broadcastMessages("STOP/" + clientHandlers.get(maxIndex).toString());
+        server.broadcastMessages("STOP/" + clientHandlers.get(maxIndex).getPlayerNumber());
     }
 
     private boolean checkOutOfBounds(int x, int y) {
