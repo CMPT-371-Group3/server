@@ -50,7 +50,13 @@ public class BoardCell {
         return isFilled;
     }
 
+    /**
+     * Set the cell to filled
+     * @param c
+     */
     public void setIsFilled(ClientHandler c) {
+        // Check to make sure the cell is locked and that the client filling the cell is the one
+        // that locked it
         if(locked && lockedBy == c)
             isFilled = true;
     }

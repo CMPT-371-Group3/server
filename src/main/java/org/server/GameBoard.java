@@ -46,13 +46,22 @@ public class GameBoard {
         return Board.get(x).get(y).getLocked();
     }
 
-    // Returns true if game has ended
-    public boolean checkState(ArrayList<ClientHandler> clientHandlers) {
+    /**
+     * This method checks the state of the game, and returns true if the game has reach an endgame condition
+     * @param clientHandlers
+     * @return True if the game is ended, otherwise false
+     */
+    public boolean checkEnded(ArrayList<ClientHandler> clientHandlers) {
+        // Setup a counter and an array for all the clients
         int counter = 0;
         int clients[] = new int[4];
         for (int i = 0; i < clientHandlers.size(); i++) {
             clients[i] = 0;
         }
+
+        // Check each cell, if it is filled, increment the counter and also check which client it is an increment that
+        // clients index in the array (This is used to see if a client has already won a game, in which case we can end
+        // it)
         for (ArrayList<BoardCell> boardCells : Board) {
             for (BoardCell boardCell : boardCells) {
                 if (boardCell.getIsFilled()) {
@@ -62,20 +71,32 @@ public class GameBoard {
             }
         }
 
+        // Return true if the counter is equal to the total number of cells
         if(counter == (Rows * Cols)) return true;
 
+        // Return true if there is a client that has won the game
         for (int i = 1; i < clients.length; i++){
             if(clients[i] >= ((Rows * Cols)/2 + 1)) return true;
         }
+
+        // Otherwise return false
         return false;
     }
 
+    /**
+     * This method gets the winner or winners and broadcasts it to all the clients
+     * @param server
+     * @param clientHandlers
+     */
     public void getWinner(Server server, ArrayList<ClientHandler> clientHandlers) {
-        server.endGame();
+        // First declare an array that we use to check each client and setup an index for each client
         int clients[] = new int[4];
         for (int i = 0; i < clientHandlers.size(); i++) {
             clients[i] = 0;
         }
+
+        // Run through the board and if the board cell is filled, get which client locked it and increment that
+        // index in the array
         for (ArrayList<BoardCell> boardCells : Board) {
             for (BoardCell boardCell : boardCells) {
                 if (boardCell.getIsFilled()) {
@@ -83,6 +104,8 @@ public class GameBoard {
                 }
             }
         }
+
+        // Declare variables to use for checking the winner
         int max = 0;
         int maxIndex = -1;
         int maxIndexTie = -1;
@@ -91,6 +114,10 @@ public class GameBoard {
         boolean isTie = false;
         boolean isTieTwo = false;
         boolean isTieThree = false;
+
+        // Run through each client and compare their score with the maximum, we have 4 cases because we can have 1
+        // winner or a 2, 3 or 4 way tie. For each type of tie we activate it by setting a boolean to true and
+        // saving the client's index
         for(int i = 0; i < clientHandlers.size(); i++) {
             if(clients[i] > max) {
                 max = clients[i];
@@ -105,8 +132,9 @@ public class GameBoard {
                 isTieThree = true;
                 maxIndexTieThree = i;
             }
-
         }
+
+        // Depending on what type of tie we have (or a single winner) broadcast a corresponding message
         if(isTieThree)
             server.broadcastMessages("STOP/" + clientHandlers.get(maxIndex).getPlayerNumber() + ","
                     + clientHandlers.get(maxIndexTie).getPlayerNumber() + ","
@@ -123,6 +151,12 @@ public class GameBoard {
             server.broadcastMessages("STOP/" + clientHandlers.get(maxIndex).getPlayerNumber());
     }
 
+    /**
+     * This method checks in the input coordinates are out of bounds
+     * @param x
+     * @param y
+     * @return True if it is out of bounds; False if it is not
+     */
     private boolean checkOutOfBounds(int x, int y) {
         return (x < 0 && x >= Rows && y < 0 && y >= Cols);
     }

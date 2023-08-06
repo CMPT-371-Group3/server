@@ -178,8 +178,9 @@ public class Server {
         if (result) broadcastMessages("FILL/" + row + "," + col + "/" + c.getPlayerNumber());
 
         onBoardChange();
-        boolean isFinished = gameBoard.checkState(clients);
+        boolean isFinished = gameBoard.checkEnded(clients);
         if(isFinished) {
+            this.endGame();
             gameBoard.getWinner(this, clients);
         }
     }
