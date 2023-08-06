@@ -34,13 +34,16 @@ public class ClientHandler implements Runnable {
         this.out.println(message);
     }
 
+    /**
+     * Disconnects the client from the server
+     */
     public void disconnect() {
         try {
-            // Close the connection
+            // Close the input, output and the socket connection
             this.in.close();
             this.out.close();
             this.clientSocket.close();
-            System.out.println("Disconnected Client");
+            System.out.println("Disconnected player " + playerNumber);
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }

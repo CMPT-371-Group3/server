@@ -111,9 +111,12 @@ public class Client {
         return sc.nextLine();
     }
 
+    /**
+     * Disconnects the client from the server
+     */
     public void disconnect() {
         try {
-            // Close the connection
+            // Close the input, output and the socket connection
             this.input.close();
             this.output.close();
             this.socket.close();
