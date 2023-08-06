@@ -124,6 +124,10 @@ public class Server {
         onBoardChange();
     }
 
+    public void endGame() {
+        gameStarted = false;
+    }
+
     private void checkRestart() {
         if (clients.size() == 0) {
             init();

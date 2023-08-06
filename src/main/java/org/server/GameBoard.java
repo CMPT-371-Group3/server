@@ -71,6 +71,7 @@ public class GameBoard {
     }
 
     public void getWinner(Server server, ArrayList<ClientHandler> clientHandlers) {
+        server.endGame();
         int clients[] = new int[4];
         for (int i = 0; i < clientHandlers.size(); i++) {
             clients[i] = 0;
@@ -85,17 +86,37 @@ public class GameBoard {
         int max = 0;
         int maxIndex = -1;
         int maxIndexTie = -1;
+        int maxIndexTieTwo = -1;
+        int maxIndexTieThree = -1;
         boolean isTie = false;
+        boolean isTieTwo = false;
+        boolean isTieThree = false;
         for(int i = 0; i < clientHandlers.size(); i++) {
             if(clients[i] > max) {
                 max = clients[i];
                 maxIndex = i;
-            } else if(clients[i] == max) {
+            } else if (!isTie && clients[i] == max) {
                 isTie = true;
                 maxIndexTie = i;
+            } else if (!isTieTwo && clients[i] == max) {
+                isTieTwo = true;
+                maxIndexTieTwo = i;
+            } else if (!isTieThree && clients[i] == max) {
+                isTieThree = true;
+                maxIndexTieThree = i;
             }
+
         }
-        if(isTie)
+        if(isTieThree)
+            server.broadcastMessages("STOP/" + clientHandlers.get(maxIndex).getPlayerNumber() + ","
+                    + clientHandlers.get(maxIndexTie).getPlayerNumber() + ","
+                    + clientHandlers.get(maxIndexTieTwo).getPlayerNumber() + ","
+                    + clientHandlers.get(maxIndexTieThree).getPlayerNumber());
+        else if (isTieTwo)
+            server.broadcastMessages("STOP/" + clientHandlers.get(maxIndex).getPlayerNumber() + ","
+                    + clientHandlers.get(maxIndexTie).getPlayerNumber() + ","
+                    + clientHandlers.get(maxIndexTieTwo).getPlayerNumber());
+        else if (isTie)
             server.broadcastMessages("STOP/" + clientHandlers.get(maxIndex).getPlayerNumber() + ","
                     + clientHandlers.get(maxIndexTie).getPlayerNumber());
         else
