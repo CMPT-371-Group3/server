@@ -20,27 +20,8 @@ public class BoardCell {
     public void setLockedBy(ClientHandler c) {
        this.lockedBy = c; 
     }
-    /*
     
-    public boolean setLockedBy(Client client) {
-        // lock if not already locked
-        if (lockedBy != null) {
-            return false;
-        }
-
-        if (!sema.tryAcquire()) {
-            return false;
-        }
-
-        lockedBy = client;
-        return true;
-    }
-    */
-
     public boolean setLocked(ClientHandler c) {
-        // if (locked) {
-        //     return false;
-        // }
 
         if (!sema.tryAcquire()) {
             return false;

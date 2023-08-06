@@ -115,9 +115,7 @@ public class ClientHandler implements Runnable {
             server.broadcastMessages(this, clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort() + " has disconnected");
             //System.out.println(clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort() + " has disconnected");
             server.removeClient(this);
-        }
-
-        
+        }        
     }
 
     public boolean getIsReady() {

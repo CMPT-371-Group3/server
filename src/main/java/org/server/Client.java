@@ -79,24 +79,9 @@ public class Client {
                         break;
                     default:
                         System.out.println("Invalid selection");
-                }
-                // synchronized (lock) {
-                //     try {
-                //         lock.wait(); // Wait for notification from the other thread
-                //     } catch (InterruptedException e) {
-                //         e.printStackTrace();
-                //     }
-                // }
-                //client.setMsgSent(false);           
+                }       
             }
             System.out.println("Stopped listening");
-            // if (line.equalsIgnoreCase("exit")) {
-            //     client.getOutput().println("EXIT");
-            //     client.getOutput().flush();                    
-            // } 
-            //client.disconnect();
-            /*
-            */
         } catch(IOException e) {
             e.printStackTrace();
         }
@@ -181,19 +166,6 @@ public class Client {
     public String getAddressWithPort() {
         return this.addressWithPort;
     }
-
-    // @Override
-    // public void run() {
-    //     try {
-    //         // listen for messages and pass them to the server
-    //         while (true) {
-    //             String message = this.Input.readLine();
-    //             this.Server.handleClientMessage(message, this);
-    //         }
-    //     } catch (Exception e) {
-    //         System.out.println("Error: " + e.getMessage());
-    //     }
-    // }
 
     public void setMsgSent(Boolean b) {
         this.msgSent = b;

@@ -1,7 +1,6 @@
 package org.server;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class GameBoard {
     private int Rows;
@@ -93,7 +92,7 @@ public class GameBoard {
                 maxIndex = i;
             }
         }
-        server.broadcastMessages(null, "STOP" + "\n" + "Client " + clientHandlers.get(maxIndex).toString() + " has won the game!");
+        server.broadcastMessages(null, "STOP/" + clientHandlers.get(maxIndex).toString());
     }
 
     private boolean checkBounds(int x, int y) {
