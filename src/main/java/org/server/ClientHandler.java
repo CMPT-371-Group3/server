@@ -12,7 +12,7 @@ public class ClientHandler implements Runnable {
     private BufferedReader in;
     private boolean isReady = false;
     private Server server;
-    private int playerNumber;
+    private int playerNumber; // 1-4
     
     public ClientHandler(Socket socket, Server server, int playerNumber) {
         this.clientSocket = socket;
@@ -30,6 +30,11 @@ public class ClientHandler implements Runnable {
         }
     }
     
+    /**
+     * Sends a message to the client
+     * @param message
+     * the message to send
+     */
     public void sendMessage(String message) {
         this.out.println(message);
     }
@@ -49,13 +54,19 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    /**
+     * This method runs when the thread is started.
+     * It listens for messages from the client and handles them by
+     * calling the appropriate methods in the server.
+     * It also handles the client disconnecting.
+     */
     public void run() {
         try {
             this.out.println(clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort());
-            String line = this.in.readLine();
+            String line = this.in.readLine(); // read the first line
             while (line != null && !line.equalsIgnoreCase("exit")) {
                 // parse line
-                String[] tokens = line.split("/");
+                String[] tokens = line.split("/"); // split by "/"
                 switch (tokens[0]) {
                     case "JOIN":
                         server.broadcastMessages("\n" + this.clientSocket.getInetAddress().getHostAddress() + ":" + this.clientSocket.getPort() + " has connected");
@@ -91,7 +102,7 @@ public class ClientHandler implements Runnable {
             }
         } catch(IOException e) {
             e.printStackTrace();
-        } finally {
+        } finally { // if the client disconnects, remove it from the server
             try {
                 if (out != null) {
                     out.close();
@@ -108,10 +119,20 @@ public class ClientHandler implements Runnable {
         }        
     }
 
+    /**
+     * Get the ready status of the client
+     * @return
+     * the ready status of the client
+     */
     public boolean getIsReady() {
         return this.isReady;
     }
 
+    /**
+     * Get the player number of the client
+     * @return
+     * the player number of the client
+     */
     public int getPlayerNumber() {
         return this.playerNumber;
     }
