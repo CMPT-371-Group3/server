@@ -21,17 +21,49 @@ public class GameBoard {
         }
     }
 
+    /**
+     * This method locks a cell for a client
+     * @param x
+     * the x coordinate of the cell
+     * @param y
+     * the y coordinate of the cell
+     * @param c
+     * the client that is locking the cell
+     * @return True if the cell was successfully locked, otherwise false
+     */
     public boolean lockCell(int x, int y, ClientHandler c) {
         if (checkOutOfBounds(x, y)) return false;
         return Board.get(x).get(y).setLocked(c);
     }
 
+    /**
+     * This method unlocks a cell for a client
+     * @param x
+     * the x coordinate of the cell
+     * @param y
+     * the y coordinate of the cell
+     * @param c
+     * the client that is unlocking the cell
+     * @return 
+     * True if the cell was successfully unlocked, otherwise false
+     */
     public boolean unlockCell(int x, int y, ClientHandler c) {
         if (checkOutOfBounds(x, y)) return false;
 
         return Board.get(x).get(y).unlock(c);
     }
 
+    /**
+     * This method fills a cell for a client
+     * @param x
+     * the x coordinate of the cell
+     * @param y
+     * the y coordinate of the cell
+     * @param c
+     * the client that is filling the cell
+     * @return 
+     * True if the cell was successfully filled, otherwise false
+     */
     public boolean fillCell(int x, int y, ClientHandler c) {
         if (checkOutOfBounds(x, y)) return false;
 
@@ -40,6 +72,15 @@ public class GameBoard {
         return true;
     }
 
+    /**
+     * This method checks if a cell is filled
+     * @param x
+     * the x coordinate of the cell
+     * @param y
+     * the y coordinate of the cell
+     * @return 
+     * True if the cell is filled, otherwise false
+     */
     public boolean isLocked(int x, int y) {
         if (checkOutOfBounds(x, y)) return false;
 
@@ -49,7 +90,10 @@ public class GameBoard {
     /**
      * This method checks the state of the game, and returns true if the game has reach an endgame condition
      * @param clientHandlers
-     * @return True if the game is ended, otherwise false
+     * The list of clients
+     * @return 
+     * True if the game is ended, otherwise false
+     * 
      */
     public boolean checkEnded(ArrayList<ClientHandler> clientHandlers) {
         // Setup a counter and an array for all the clients
@@ -161,6 +205,11 @@ public class GameBoard {
         return (x < 0 && x >= Rows && y < 0 && y >= Cols);
     }
 
+    /**
+     * This method returns the board as a string.
+     * Used for debugging purposes.
+     * @return
+     */
     public String toString() {
         String str = "";
         for (int i = 0; i < Cols; i++) {

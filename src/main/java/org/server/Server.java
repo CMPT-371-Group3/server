@@ -12,26 +12,41 @@ public class Server {
 
     public Server(int portNumber) {
         try {
-            this.server = new ServerSocket(portNumber);
             // Create an ArrayList for Clients and save the Port Number then create a ServerSocket
+            this.server = new ServerSocket(portNumber);            
             init();
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
 
+    /**
+     * Initialize the server.
+     * Create a new GameBoard and reset the clients ArrayList.
+     * Start the server.
+     */
     private void init() {
         this.gameBoard = new GameBoard(8, 8);
         this.clients = new ArrayList<>();
         startServer();
     }
 
+    /**
+     * Start the server.
+     * Listen for connections.
+     * Check if all clients are ready.
+     */
     public void startServer() {
         System.out.println( "Server Started on IP " + this.server.getInetAddress().getHostAddress() + " and Port " + this.server.getLocalPort());
         listenForConnections();
         checkReady();
     }
 
+    /**
+     * Listen for connections.
+     * Create a new ClientHandler for each connection.
+     * Start a new thread for each ClientHandler.
+     */
     private void listenForConnections() {
         new Thread(() -> {
             System.out.println("Listening for connections");
@@ -64,6 +79,10 @@ public class Server {
         }).start();
     }
 
+    /**
+     * Check if all clients are ready.
+     * If all clients are ready, start the game.
+     */
     private void checkReady() { 
         new Thread(() -> {
             int clientsCount = 0;
@@ -114,6 +133,11 @@ public class Server {
         }).start();
     }
 
+    /**
+     * Start the game
+     * Broadcast a message to all clients
+     * Send the game board to all clients
+     */
     private void startGame() {
         synchronized (clients) {
             System.out.println(clients.size() + " clients have joined and are all ready. Starting game");
@@ -124,16 +148,30 @@ public class Server {
         onBoardChange();
     }
 
+
+    /**
+     * End the game
+     */
     public void endGame() {
         gameStarted = false;
     }
 
+    /**
+     * Check if all clients have left.
+     * If all clients have left, restart the server.
+     * Currently not working as intended.
+     */
     private void checkRestart() {
         if (clients.size() == 0) {
             init();
         }
     }
     
+    /**
+     * Broadcast a message to all clients
+     * @param message 
+     * The message to be broadcasted
+     */
     public void broadcastMessages(String message) {
         System.out.println("Broadcasting \n" + message);
         // send to all clients
@@ -142,6 +180,15 @@ public class Server {
         }
     }
 
+    /**
+     * Lock a cell on the game board
+     * @param row
+     * the row of the cell
+     * @param col
+     * the column of the cell
+     * @param c
+     * the client that is locking the cell
+     */
     public void lockCell(int row, int col, ClientHandler c) {
         if (!gameStarted) {
             broadcastMessages("Game has not been started yet. Move has been ignored.");
@@ -155,6 +202,15 @@ public class Server {
         onBoardChange();
     }
 
+    /**
+     * Unlock a cell on the game board
+     * @param row
+     * the row of the cell
+     * @param col
+     * the column of the cell
+     * @param c
+     * the client that is unlocking the cell
+     */
     public void unlockCell(int row, int col, ClientHandler c) {
         if (!gameStarted) {
             broadcastMessages("Game has not been started yet. Move has been ignored.");
@@ -168,6 +224,16 @@ public class Server {
         onBoardChange();
     }
 
+    /**
+     * Fill a cell on the game board.
+     * Only one thread can access this method at a time
+     * @param row
+     * the row of the cell
+     * @param col
+     * the column of the cell
+     * @param c
+     * the client that is filling the cell
+     */
     public synchronized void fillCell(int row, int col, ClientHandler c) {
         if (!gameStarted) {
             broadcastMessages("Game has not been started yet. Move has been ignored.");
@@ -185,11 +251,19 @@ public class Server {
         }
     }
 
+    /**
+     * Broadcast the game board to all clients
+     */
     private void onBoardChange() {
         broadcastMessages("BOARD");
         broadcastMessages(gameBoard.toString());
     }
 
+    /**
+     * Remove a client from the clients ArrayList
+     * Check if the server needs to be restarted 
+     * @param client
+     */
     public void removeClient(ClientHandler client) {
         synchronized (clients) {
             clients.remove(client);
